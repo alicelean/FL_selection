@@ -1,0 +1,6 @@
+1,dataset,method,round,ratio,average_time_per,total_time,time_list
+2,mnist,FedAvg,2,0.5,63.5561089515686,127.1122179031372,"[63.75818395614624, 63.35403394699097]"
+1,dataset,method,round,ratio,average_time_per,total_time,time_list
+2,mnist,FedAvg,2,0.5,62.75445508956909,125.50891017913818,"[64.166748046875, 61.342162132263184]"
+1,dataset,method,round,ratio,average_time_per,total_time,time_list
+2,mnist,FedAvg,2,0.5,63.085771322250366,126.17154264450073,"[62.53001880645752, 63.64152383804321]"

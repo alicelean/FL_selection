@@ -1,0 +1,2 @@
+1,dataset,method,round,ratio,average_time_per,total_time,time_list
+2,mnist,FedDyn,3,0.5,96.6578905582428,289.9736716747284,"[123.6055018901825, 82.9969527721405, 83.3712170124054]"

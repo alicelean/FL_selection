@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/FL_selection.iml" filepath="$PROJECT_DIR$/.idea/FL_selection.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../PFL/.idea/PFL.iml" filepath="$PROJECT_DIR$/../PFL/.idea/PFL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" filepath="$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" filepath="$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" />
     </modules>
   </component>
