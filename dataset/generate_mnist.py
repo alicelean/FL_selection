@@ -10,14 +10,16 @@ from utils.dataset_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 20
+num_clients = 500
 num_classes = 10
 dir_path = "mnist/"
 
 
 # Allocate data to users
 def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition):
+    print("dir_path is  ", dir_path)
     if not os.path.exists(dir_path):
+
         os.makedirs(dir_path)
         
     # Setup directory for train/test data
@@ -25,8 +27,9 @@ def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
     train_path = dir_path + "train/"
     test_path = dir_path + "test/"
 
-    if check(config_path, train_path, test_path, num_clients, num_classes, niid, balance, partition):
-        return
+    # if check(config_path, train_path, test_path, num_clients, num_classes, niid, balance, partition):
+    #     print("it exits")
+    #     return
 
     # FIX HTTP Error 403: Forbidden
     from six.moves import urllib
@@ -41,11 +44,14 @@ def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
         root=dir_path+"rawdata", train=True, download=True, transform=transform)
     testset = torchvision.datasets.MNIST(
         root=dir_path+"rawdata", train=False, download=True, transform=transform)
+
+    print("data is down load ")
     trainloader = torch.utils.data.DataLoader(
         trainset, batch_size=len(trainset.data), shuffle=False)
     testloader = torch.utils.data.DataLoader(
         testset, batch_size=len(testset.data), shuffle=False)
 
+    print("data is down load ")
     for _, train_data in enumerate(trainloader, 0):
         trainset.data, trainset.targets = train_data
     for _, test_data in enumerate(testloader, 0):
@@ -65,7 +71,7 @@ def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
     # for i in range(num_classes):
     #     idx = dataset_label == i
     #     dataset.append(dataset_image[idx])
-
+    print("data is separate_data ")
     X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes, 
                                     niid, balance, partition)
     train_data, test_data = split_data(X, y)
@@ -74,8 +80,10 @@ def generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)
 
 
 if __name__ == "__main__":
-    niid = True if sys.argv[1] == "noniid" else False
-    balance = True if sys.argv[2] == "balance" else False
-    partition = sys.argv[3] if sys.argv[3] != "-" else None
-
+    # niid = True if sys.argv[1] == "noniid" else False
+    # balance = True if sys.argv[2] == "balance" else False
+    # partition = sys.argv[3] if sys.argv[3] != "-" else None
+    niid = True
+    balance = False
+    partition = "dir"
     generate_mnist(dir_path, num_clients, num_classes, niid, balance, partition)

@@ -189,6 +189,7 @@ class PramidFy(Selecter):
                 handle_start = time.time()
                 tmp_dict = queue.get()
                 rank_src = list(tmp_dict.keys())[0]
+                print("tmp_dict[rank_src]) is :",tmp_dict[rank_src])
                 [iteration_loss, trained_size, isWorkerEnd, clientIds, speed, testRes, virtualClock] = \
                     [tmp_dict[rank_src][i] for i in range(1, len(tmp_dict[rank_src]))]
                 workersToSend.append(rank_src)

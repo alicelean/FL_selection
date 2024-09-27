@@ -7,7 +7,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 batch_size = 10
 train_size = 0.75 # merge original training set and test set, then split it manually. 
 least_samples = batch_size / (1-train_size) # least samples for each client
-alpha = 0.01 # for Dirichlet distribution
+alpha = 0.1 # for Dirichlet distribution
 
 def check(config_path, train_path, test_path, num_clients, num_classes, niid=False,
         balance=True, partition=None):
@@ -120,36 +120,36 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
         min_size = 0
         K = num_classes
         N = len(dataset_label)
-
+        print(f"dir 划分，least_samples is{least_samples},min_size {min_size}，total data {N}")
         while min_size < least_samples:
+            #print(f"dir 划分，least_samples is{least_samples},min_size {min_size}，K is {K},num_clients is {num_clients}")
             #idx_batch，其中包含 num_clients 个空列表，用于存储每个客户端的样本索引
             idx_batch = [[] for _ in range(num_clients)]
-            print()
             for k in range(K):
                 #返回一个数组，包含所有标签为2的样本的索引。 np.where(dataset_label == k)[0]表示在 dataset_label 中找到所有等于 k 的元素，并返回它们的索引。
                 idx_k = np.where(dataset_label == k)[0]
                 #随机打乱list
                 np.random.shuffle(idx_k)
-
-                #dirichlet 函数用于生成符合狄利克雷分布的随机数。一种多维概率分布，常用于生成多类别的随机变量。
-                #给定参数 alpha 和样本数目 num_clients ,num_clients可以表示维度，np.repeat(alpha, num_clients)：将 alpha 中的每个元素重复 num_clients 次而得到。
-                # 生成一个长度为 num_clients 的数组,每个元素表示一个随机样本，符合狄利克雷分布,alpha 是一个正数数组，用于指定每个维度的参数值，np.repeat(alpha, num_clients) 将 alpha 数组进行复制，使其长度与 num_clients 相同
-                #np.random.dirichlet()它的参数是一个正数数组 alpha，表示每个维度的权重或浓度，np.random.dirichlet(alpha) 将返回一个随机样本，符合狄利克雷分布，其中样本的维度与 alpha 数组的长度相同
-                proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
-                #print("proportions",proportions)
-
-                #idx_j:client j 的样本索引列表，将数据集样本数量 N 平均分配给 num_clients 个客户端，根据当前客户端已经包含的样本数量，动态调整该客户端所占比例 p 的值，当客户端已经包含的样本数量小于每个客户端应分配的样本数时，该客户端的比例保持不变 (p)；否则，该客户端的比例被设置为0，即不再接收更多的样本。确保每个客户端接收到的样本数量不超过其应分配的样本数。
-                #在数据集划分过程中，可能会出现一些客户端已经接收到足够数量的样本，而其他客户端仍需要更多样本的情况。通过这个条件表达式，可以在采样时限制每个客户端接收样本的数量，以实现平衡性的划分。
+                min_value = 0.001
+                #proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
+                proportions = generate_adjusted_dirichlet(alpha, num_clients, min_value)
                 proportions = np.array([p*(len(idx_j)<N/num_clients) for p,idx_j in zip(proportions,idx_batch)])
                 #表中的元素进行归一化处理，将比例值调整为相对比例，以便在划分样本时能够按比例分配给每个客户端
                 proportions = proportions/proportions.sum()
-                #累积求和操作通常用于计算累积概率分布、累积和等方面，将累积和按比例进行缩放。将浮点数转换为整数，去掉最后一个元素
                 proportions = (np.cumsum(proportions)*len(idx_k)).astype(int)[:-1]
+                #print("proportions:", k,len(proportions), sum(proportions))
                 #print(f"proportions len:{len(proportions)},num_clients:{num_clients}")
                 #np.split(idx_k,proportions)：根据 proportions 的值，将 idx_k 分割成了多个子数组，每个子数组由 proportions 中的相应位置指定
                 idx_batch = [idx_j + idx.tolist() for idx_j,idx in zip(idx_batch,np.split(idx_k,proportions))]
                 #用于记录 idx_batch 中所有子数组的最小长度。
+
                 min_size = min([len(idx_j) for idx_j in idx_batch])
+
+            for idx in range(len(idx_batch)):
+                idx_j=idx_batch[idx]
+                if len(idx_j)<least_samples:
+                    print("idx_batch is ",idx,len(idx_j))
+
 
         for j in range(num_clients):
             dataidx_map[j] = idx_batch[j]
@@ -180,6 +180,16 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
     return X, y, statistic
 
 
+def generate_adjusted_dirichlet(alpha, num_clients, min_value):
+    proportions = np.random.dirichlet(np.repeat(alpha, num_clients))
+    print("before proportions :", proportions)
+    # 确保每个元素不小于 min_value
+    proportions = np.maximum(proportions, min_value)
+
+    # 重新归一化，使总和为 1
+    proportions /= proportions.sum()
+    print("after proportions :",proportions)
+    return proportions
 def split_data(X, y):
     # Split dataset
     train_data, test_data = [], []
