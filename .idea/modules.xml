@@ -5,6 +5,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/FL_selection.iml" filepath="$PROJECT_DIR$/.idea/FL_selection.iml" />
       <module fileurl="file://$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" filepath="$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" filepath="$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../plot_allresult/.idea/plot_allresult.iml" filepath="$PROJECT_DIR$/../../plot_allresult/.idea/plot_allresult.iml" />
+      <module fileurl="file://$USER_HOME$/De/pythonProject/.idea/pythonProject.iml" filepath="$USER_HOME$/De/pythonProject/.idea/pythonProject.iml" />
     </modules>
   </component>
 </project>

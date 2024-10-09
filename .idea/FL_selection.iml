@@ -6,5 +6,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="PyramidFL" />
     <orderEntry type="module" module-name="PFLlib" />
+    <orderEntry type="module" module-name="plot_allresult" />
+    <orderEntry type="module" module-name="pythonProject" />
   </component>
 </module>

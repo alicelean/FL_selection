@@ -16,6 +16,7 @@ class FedAvg(Server):
 
         self.selection = PramidFy(args,self.num_join_clients)
         self.queue = queue.Queue()
+        self.InfoQueue= queue.Queue()
         self.stop_signal=queue.Queue()
 
 
@@ -25,7 +26,7 @@ class FedAvg(Server):
         self.set_clients(clientAVG)
         #在初始化客户端以后需要在注册器中注册每个客户端的信息
         self.sampledClientSet=set()
-        self.clientSampler = self.selection.initiate_sampler_query(self.queue, 20)
+        self.clientSampler = self.selection.initiate_sampler_query(self.InfoQueue, args.num_clients)
         for nextClientIdToRun in range(args.num_clients):
             self.clientSampler.clientOnHost([nextClientIdToRun], nextClientIdToRun)
             self.sampledClientSet.add(nextClientIdToRun)
@@ -256,7 +257,7 @@ class FedAvg(Server):
             tmp_dict[i]=[]
             tmp_dict[i].append(distanceVec)
             tmp_dict[i].append(sizeVec)
-            self.queue.put(tmp_dict)
+            self.InfoQueue.put(tmp_dict)
             #self.selection.InfoQueue.put(tmp_dict)
 
         for client in self.clients:

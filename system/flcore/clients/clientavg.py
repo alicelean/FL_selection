@@ -110,8 +110,8 @@ class clientAVG(Client):
         #print("ssss:",preTrainedLoss,trainedSize,trainSpeed,virtualClock,ranClients)
         isComplete=True
         testResults=None
-        queue.put({self.id: [trainedModels, preTrainedLoss, trainedSize, isComplete, ranClients, trainSpeed, testResults,
-                          virtualClock]})
+        # queue.put({self.id: [trainedModels, preTrainedLoss, trainedSize, isComplete, ranClients, trainSpeed, testResults,
+        #                   virtualClock]})
 
         if self.learning_rate_decay:
             self.learning_rate_scheduler.step()
