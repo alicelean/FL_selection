@@ -8,5 +8,6 @@
     <orderEntry type="module" module-name="PFLlib" />
     <orderEntry type="module" module-name="plot_allresult" />
     <orderEntry type="module" module-name="pythonProject" />
+    <orderEntry type="module" module-name="Deep-reinforcement-learning-with-pytorch" />
   </component>
 </module>

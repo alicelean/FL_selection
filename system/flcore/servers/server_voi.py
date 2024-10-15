@@ -1,5 +1,5 @@
 import time,os,queue
-from flcore.clients.clientavg import clientAVG
+from flcore.clients.client_voi import clientVOI
 from flcore.servers.serverbase import Server
 from threading import Thread
 import pandas as pd
@@ -8,8 +8,10 @@ from concurrent.futures import ThreadPoolExecutor
 from selection.PramidFy import *
 from utils.data_utils import read_client_data
 import random,copy
+from system.selection.rl.fl.main import rl_main
 
-class FedAvg(Server):
+class FedVOI(Server):
+
     def __init__(self, args, times):
         super().__init__(args, times)
         self.method = "FedAvg"
@@ -18,12 +20,16 @@ class FedAvg(Server):
         self.queue = queue.Queue()
         self.InfoQueue= queue.Queue()
         self.stop_signal=queue.Queue()
+        self.popReward=0
+
+
+
 
 
 
         # select slow clients
         self.set_slow_clients()
-        self.set_clients(clientAVG)
+        self.set_clients(clientVOI)
         #在初始化客户端以后需要在注册器中注册每个客户端的信息
         self.sampledClientSet=set()
         self.clientSampler = self.selection.initiate_sampler_query(self.InfoQueue, args.num_clients)
@@ -45,57 +51,34 @@ class FedAvg(Server):
         # self.load_model()
         self.Budget = []
 
+    def update_client_states(self):
+        self.client_states=[]
+        for client in self.clients:
+            client.states = [client.loss, client.size, client.stale, client.age]
+            self.client_states.append(client.states)
 
+    def caculate_reward(self,train_loss):
+        self.popReward=100000-train_loss
 
     def train(self):
+        # rl_args = get_args()
+        # rl_main(rl_args)
        #新增1————————————————————————————————————————————————————————————————————————————————
         colum_value = []
         select_id = []
         if self.fix_ids:
             self.read_fix_id()
        # ————————————————————————————————————————————————————————————————————————————————
-
         for i in range(self.global_rounds+1):
             s_t = time.time()
-            #训练之前先计算客户端的状态
-            if i%self.eval_gap == 0:
-                print(f"\n-------------Round number: {i}-------------")
-                print("\nEvaluate global model")
-                #self.evaluate()
-                #localResult=[self.method, group, train_loss, test_acc, test_auc, np.std(accs), np.std(aucs)]
-                localResult = self.evaluate(i)
-                res = self.evaluate_global(i,self.global_model)
-                print("res is:",res)
-                #print("resg is:", res1)
-                # 新增3————————————————————————————————————————————————————————————————————————————————
-                # 记录当前模型的状态，loss,accuracy
-                resc=self.addvalue(res)
-                colum_value.append(resc)
-                #print("colum_value is",colum_value,resc is {resc})
-                # ————————————————————————————————————————————————————————————————————————————————
+            
             # 新增2————————————————————————————————————————————————————————————————————————————————
 
             ids=self.get_selected_clients(i)
             select_id.append([i, ids])
             # ————————————————————————————————————————————————————————————————————————————————
-
-
             self.send_models(ids,i)
-
-            # if i%self.eval_gap == 0:
-            #     print(f"\n-------------Round number: {i}-------------")
-            #     print("\nEvaluate global model")
-            #     #self.evaluate()
-            #     #res = self.evaluate(i)
-            #     res = self.evaluate_global(i,self.global_model)
-            #     print("res is:",res)
-            #     #print("resg is:", res1)
-            #     # 新增3————————————————————————————————————————————————————————————————————————————————
-            #     # 记录当前模型的状态，loss,accuracy
-            #     resc=self.addvalue(res)
-            #     colum_value.append(resc)
-            #     #print("colum_value is",colum_value,resc is {resc})
-            #     # ————————————————————————————————————————————————————————————————————————————————
+         # ————————————————————————————————————————————————————————————————————————————————
 
             # 参与客户端训练本地数据（所有客户端参与训练）
             # for client in self.clients:
@@ -107,81 +90,42 @@ class FedAvg(Server):
             t = ThreadPoolExecutor(max_workers=5)
             j=0
             for client in self.clients:
-                if client.id in ids:
-                #print(f"client is {client.id,i},client training start")
-                    tmp_r_list.append(t.submit(client.train, self.queue))
-                    tmp_r_list[j].result()
-                    j+=1
+                tmp_r_list.append(t.submit(client.train, self.queue))
+                tmp_r_list[j].result()
+                j+=1
 
 
 
             self.sampledClientSet=self.selection.run(self.global_model, self.queue, self.stop_signal, self.clientSampler,self.sampledClientSet,i)
             print("###"*20,f"  round is {i}self.selection.run {self.sampledClientSet}")
-            # threads = [Thread(target=client.train(queue))
-            #            for client in self.selected_clients]
-            # [t.start() for t in threads]
-            # [t.join() for t in threads]
-
-            #------
-            # aggreError = []
-            # for client in self.clients:
-            #     # i=0时，不是聚合得到的全局模型。不需要计算全局模型在本地的损失
-            #     if i > 0 and client.isselected:
-            #         # 上一轮训练得到的全局模型，还没有开始本地训练，但是已经传送全局模型过去了。
-            #         client.calculate_gobal_loss(self.global_model)
-            #         # print(client.globalloss, client.localloss)
-            #         # print(f"{i},client {client.id},global loss is {client.globalloss[-1]:.4f},local loss is {client.localloss[-1]:.4f},aggragation error is {client.globalloss[-1] - client.localloss[-1]:.4f}")
-            #         aggreError.append(client.globalloss[-1] - client.localloss[-1])
-            #         client.error.append(client.globalloss[-1] - client.localloss[-1])
-            # self.aggreErr.append([i, np.mean(aggreError), np.var(aggreError)])
-            # print([i, np.mean(aggreError), np.var(aggreError)])
-            # for client in self.clients:
-            #     client.isselected = False
-            # for client in self.selected_clients:
-            #     client.train()
-            #     client.isselected = True
-            #     # client.selected = True
-            #     client.calculate_local_loss()
-
-            #---
-            # aggreError=0
-            #
-            # for client in self.selected_clients:
-            #     #i=0时，不是聚合得到的全局模型。不需要计算全局模型在本地的损失
-            #     if i >0 :
-            #         #上一轮训练得到的全局模型，还没有开始本地训练，但是已经传送全局模型过去了。
-            #         client.calculate_gobal_loss(self.global_model)
-            #         print(client.globalloss,client.localloss)
-            #         print(f"{i},client {client.id},global loss is {client.globalloss[-1]:.4f},local loss is {client.localloss[-1]:.4f},aggragation error is {client.globalloss[-1]-client.localloss[-1]:.4f}")
-            #         aggreError=+(client.globalloss[-1] - client.localloss[-1])
-            #
-            #     client.train()
-            #     client.calculate_local_loss(self.global_model)
-            #     print(i,client.id,client.localloss)
-            #     #print(f"client {client.id},local loss is{client.localloss[-1]:.4f}")
-            # #print(f"round {i}, aggregation error {aggreError:.4f}")
-            # self.aggreErr.append(aggreError)
-        #-------------------------------------------------------------------
-
-
-
-
-
             self.receive_models()
             if self.dlg_eval and i%self.dlg_gap == 0:
                 self.call_dlg(i)
             self.aggregate_parameters()
 
-            # -------------------------------------
-            # aggreError = []
-            # for client in self.selected_clients:
-            #     client.calculate_gobal_loss(self.global_model)
-            #     client.calculate_local_loss()
-            #     aggreError.append(client.globalloss[-1] )
-            #     client.error.append(client.localloss[-1])
-            # self.aggreErr.append([i, np.mean(aggreError), np.var(aggreError)])
-            # --------------------------------------------
-
+            #--------------------------------------------------------------
+            
+            
+            #评估全局模型，获得总体损失
+            if i%self.eval_gap == 0:
+                print(f"\n-------------Round number: {i}-------------")
+                print("\nEvaluate global model")
+                #localResult=[self.method, group, train_loss, test_acc, test_auc, np.std(accs), np.std(aucs)]
+                #更新需要计算本地的状态:loss
+                _ = self.evaluate(i)
+                #print("res is:",res)
+                # 新增3————————————————————————————————————————————————————————————————————————————————
+                # 记录当前模型的状态，loss,accuracy
+                res = self.evaluate_global(i, self.global_model)
+                resc=self.addvalue(res)
+                colum_value.append(resc)
+                # 根据损失计算一下回报
+                self.caculate_reward(res[2])
+                # ————————————————————————————————————————————————————————————————————————————————
+                # 更新强化学习环境状态
+                self.update_client_states()
+            
+            #----------------------------------------------------------------
             self.Budget.append(time.time() - s_t)
             print('-'*25,"Round is ",i,'-'*25, 'time cost', '-'*25, self.Budget[-1])
             print('-'*25,"Budget is :",self.Budget)

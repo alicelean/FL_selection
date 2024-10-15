@@ -22,6 +22,33 @@ class Client(object):
         self.device = args.device
         self.id = id  # integer
         self.save_folder_name = args.save_folder_name
+        #-----rl
+
+        #客户端模型的年龄，服务器多长时间没有收到客户端的本地模型信息，选中则 self.age=0，没选中则 self.age+=1
+        self.age=0
+        #客户端的数据量大小
+        self.size=0
+        #客户端当前的损失值（当前时刻本地模型的客户端损失，这个取决于本地模型的当前状态）
+        self.loss=0
+        self.avgloss=0
+
+        self.current_round = 0
+        # 发送模型后获得最新的全局模型，此时更改
+        self.globalModel_round = 0  # 上一次参与全局模型训练
+        self.globalModel=copy.deepcopy(args.model)
+        self.localmodel = copy.deepcopy(args.model)
+        #本地训练中，全局模型的陈旧度，比如全局模型为t1时刻，当前时刻时t2时刻，那么结果就是t2-t1
+        self.stale=0
+        # 客户端的状态
+        self.states = [self.loss,self.size,self.stale,self.age]
+
+
+
+
+
+
+
+
         #记录聚合误差
         self.localloss = []
         self.globalloss = []
@@ -31,7 +58,7 @@ class Client(object):
         self.distance = 0
         self.alldistance = 0
         self.alllabel = None
-        self.localmodel=copy.deepcopy(args.model)
+
         self.isselected = False#上一轮被选择
 
         self.num_classes = args.num_classes
@@ -106,7 +133,18 @@ class Client(object):
             batch_size = self.batch_size
         test_data = read_client_data(self.dataset, self.id, is_train=False)
         return DataLoader(test_data, batch_size, drop_last=False, shuffle=False)
-        
+    def set_parameters_global(self, model,round):
+        '''
+        将model 复制给本地模型
+        Args:
+            model:
+
+        Returns:
+
+        '''
+        self.globalModel_round=round
+        for new_param, old_param in zip(model.parameters(), self.globalModel.parameters()):
+            old_param.data = new_param.data.clone()
     def set_parameters(self, model):
         '''
         将model 复制给本地模型
@@ -118,6 +156,7 @@ class Client(object):
         '''
         for new_param, old_param in zip(model.parameters(), self.model.parameters()):
             old_param.data = new_param.data.clone()
+
 
     def clone_model(self, model, target):
         for param, target_param in zip(model.parameters(), target.parameters()):
@@ -227,6 +266,11 @@ class Client(object):
         # self.save_model(self.model, 'model')
 
         return losses, train_num
+
+
+
+
+
 
     def train_metrics_last(self):
         trainloader = self.load_train_data()

@@ -350,6 +350,10 @@ class Server(object):
         ids = [c.id for c in self.clients]
 
         return ids, num_samples, tot_correct, tot_auc
+    def update_stale(self,current_round):
+        #记录每个客户端缓存池中的全局模型
+        for c in self.clients:
+            c.stale=current_round-c.globalModel_round
 
     def test_metrics_global(self,model):
         if self.eval_new_clients and self.num_new_clients > 0:
@@ -393,6 +397,9 @@ class Server(object):
             cl, ns = c.train_metrics()
             num_samples.append(ns)
             losses.append(cl*1.0)
+            #每个客户端的平均损失？还是总体损失
+            c.loss=(cl*1.0)
+            c.avgloss=(cl*1.0)/ns
         ids = [c.id for c in self.clients]
 
         return ids, num_samples, losses
@@ -508,6 +515,7 @@ class Server(object):
 
 
     def evaluate(self, group, acc=None, loss=None):
+        #利用本地模型进行评估
         stats = self.test_metrics()
         stats_train = self.train_metrics()
         try:
@@ -863,7 +871,8 @@ class Server(object):
 
         for client in self.clients:
             client.setlabel()
-            client.sizerate = (client.train_samples + client.test_samples) / samples
+            client.size=client.train_samples + client.test_samples
+            client.sizerate = (client.size*1.0) / samples
         # 根据label 来计算distance
         self.setdistance()
 
@@ -1038,6 +1047,13 @@ class Server(object):
             for client in self.selected_clients:
                 ids.append(client.id)
         return ids
+
+    def update_age(self,select_ids):
+        for client in self.clients:
+            if client.id in select_ids:
+                client.age=0
+            else:
+                client.age += 1
 
     def addvalue(self, res):
         #写入评估算法
