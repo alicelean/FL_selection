@@ -8,6 +8,7 @@ import warnings
 import numpy as np
 import torchvision
 import logging
+from flcore.servers.server_voi import FedVOI
 
 from flcore.servers.serveravg import FedAvg
 from flcore.servers.serverpFedMe import pFedMe
@@ -173,6 +174,8 @@ def run(args):
             args.model.fc = nn.Identity()
             args.model = BaseHeadSplit(args.model, args.head)
             server = FedAvg(args, i)
+        elif args.algorithm == "FedVOI":
+            server = FedVOI(args, i)
 
         elif args.algorithm == "Local":
             server = Local(args, i)
@@ -293,7 +296,14 @@ def run(args):
             raise NotImplementedError
 
         #模型训练
-        server.train()
+        #server.train()
+        server.rl_train()
+
+
+
+
+
+
 
         time_list.append(time.time()-start)
 
@@ -452,17 +462,10 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+#----------rl---------
+    parser.add_argument('--mode', dest='mode', type=str, default='train')  # can be 'train' or 'test'
+    parser.add_argument('--actor_model', dest='actor_model', type=str, default='')  # your actor model filename
+    parser.add_argument('--critic_model', dest='critic_model', type=str, default='')  # your critic model filename
 
     args = parser.parse_args()
 

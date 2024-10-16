@@ -36,19 +36,21 @@ class PPO:
 
 		# Initialize hyperparameters for training with PPO
 		self._init_hyperparameters(hyperparameters)
+        #server
+
+
 
 		# Extract environment information
 		self.env = env
 		self.obs_dim = env.observation_space.shape[0]
 		self.features_dim = env.observation_space.shape[1]
 		self.act_dim = env.action_space.shape[0]
+		print(f"ppo init self.obs_dim is {self.obs_dim}self.features_dim is {self.features_dim}self.act_dim is {self.act_dim}")
 
 		#客户端信息
-
-
-
 		# Initialize actor and critic networks
-		self.actor = policy_class(self.obs_dim,self.features_dim, self.act_dim)                                                   # ALG STEP 1
+		self.actor = policy_class(self.obs_dim,self.features_dim, self.act_dim)
+		# ALG STEP 1
 		self.critic = policy_class(self.obs_dim,self.features_dim, 1)
 
 		# Initialize optimizers for actor and critic
@@ -69,7 +71,7 @@ class PPO:
 			'actor_losses': [],     # losses of actor network in current iteration
 		}
 
-	def learn(self, total_timesteps):
+	def learn(self, StatesQueue,actionQueue,total_timesteps):
 		"""
 			Train the actor and critic networks. Here is where the main PPO algorithm resides.
 
@@ -190,11 +192,13 @@ class PPO:
 			ep_rews = [] # rewards collected per episode,一条轨迹
 			# Reset the environment. sNote that obs is short for observation.
 			#obs, _ = self.env.reset()
-			obs=self
+			obs=self.env.client_states
+			print("#"*30,f" t is {t} ;obs is {obs}")
 			done = False
 
 			# Run an episode for a maximum of max_timesteps_per_episode timesteps
 			for ep_t in range(self.max_timesteps_per_episode):
+				print("-" * 30, f"ep_t is {ep_t},t is {t},self.max_timesteps_per_episode is {self.max_timesteps_per_episode},self.timesteps_per_batch is {self.timesteps_per_batch}")
 				# If render is specified, render the environment，控制渲染的频率和条件
 				# #print(f"is can render self.logger['i_so_far'] is {self.logger['i_so_far']},self.render_every_i is{self.render_every_i}")
 				# if self.render and (self.logger['i_so_far'] % self.render_every_i == 0) and len(batch_lens) == 0:
@@ -207,9 +211,11 @@ class PPO:
 
 				# Calculate action and make a step in the env.
 				# Note that rew is short for reward.
-				action, log_prob = self.get_action(obs)
-				obs, rew, terminated, truncated, _ = self.env.step(action)
+				action, log_prob = self.get_action(obs,True)
+				print("Actor output action:", action.shape,"log_prob", log_prob.shape,)
 
+				obs, rew, terminated, truncated, _ = self.env.step(action)
+				print("env output obs:", obs.shape, "rew", rew, )
 				# Don't really care about the difference between terminated or truncated in this, so just combine them
 				#或运算
 				done = terminated | truncated
@@ -217,11 +223,13 @@ class PPO:
 				# Track recent reward, action, and action log probability
 				ep_rews.append(rew)
 				batch_acts.append(action)
+				#print("log_prob,batch_log_probs",log_prob.shape,len(batch_log_probs))
 				batch_log_probs.append(log_prob)
 
 				# If the environment tells us the episode is terminated, break
 				if done:
 					break
+
 
 			# Track episodic lengths and rewards
 			batch_lens.append(ep_t + 1)
@@ -230,7 +238,9 @@ class PPO:
 		# Reshape data as tensors in the shape specified in function description, before returning
 		batch_obs = torch.tensor(batch_obs, dtype=torch.float)
 		batch_acts = torch.tensor(batch_acts, dtype=torch.float)
-		batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
+		#batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
+		batch_log_probs = torch.stack(batch_log_probs, dim=0)  # 将多个张量沿新的维度堆叠
+
 		batch_rtgs = self.compute_rtgs(batch_rews)                                                              # ALG STEP 4
 
 		# Log the episodic returns and episodic lengths in this batch.
@@ -271,7 +281,7 @@ class PPO:
 
 		return batch_rtgs
 
-	def get_action(self, obs):
+	def get_action(self, obs,flag=True):
 		"""
 			Queries an action from the actor network, should be called from rollout.
 
@@ -284,20 +294,20 @@ class PPO:
 		"""
 		# Query the actor network for a mean action
 		mean = self.actor(obs)
-
-		# Create a distribution with the mean action and std from the covariance matrix above.
-		# For more information on how this distribution works, check out Andrew Ng's lecture on it:
-		# https://www.youtube.com/watch?v=JjB58InuTqM
-		dist = MultivariateNormal(mean, self.cov_mat)
-
-		# Sample an action from the distribution
-		action = dist.sample()
-
-		# Calculate the log probability for that action
-		log_prob = dist.log_prob(action)
-
-		# Return the sampled action and the log probability of that action in our distribution
-		return action.detach().numpy(), log_prob.detach()
+		if flag:
+			# 第二种方式
+			dist = MultivariateNormal(mean, self.cov_mat)
+			# Sample an action from the distribution
+			action = dist.sample()
+			# Calculate the log probability for that action
+			log_prob = dist.log_prob(action)
+			print("多维正太分布的动作 log_prob:", log_prob, action)
+			return action.detach().numpy(), log_prob.detach()
+		else:
+			Actionprobabilities = torch.softmax(mean, dim=1)
+			top_k_probs, top_k_indices = torch.topk(Actionprobabilities, self.env.select_num)
+			#v = self.critic(obs)
+			return top_k_indices.detach().numpy(), Actionprobabilities.detach()
 
 	def evaluate(self, batch_obs, batch_acts):
 		"""
@@ -318,10 +328,14 @@ class PPO:
 		# Query critic network for a value V for each batch_obs. Shape of V should be same as batch_rtgs
 		#用于评估给定观测值（batch_obs）的状态价值，并计算在这些观测下采取的动作（batch_acts）的对数概率
 		V = self.critic(batch_obs).squeeze()
+		print("V,batch_obs",V.shape,batch_obs.shape)
+		#print("V is ",V)
 
 		# Calculate the log probabilities of batch actions using most recent actor network.
 		# This segment of code is similar to that in get_action()
 		mean = self.actor(batch_obs)
+		print("mean is ", mean.shape,"batch_acts is ", batch_acts.shape)
+
 		dist = MultivariateNormal(mean, self.cov_mat)
 		log_probs = dist.log_prob(batch_acts)
 

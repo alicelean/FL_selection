@@ -1007,8 +1007,8 @@ class Server(object):
         #print("随机种子列表:", self.random_seed_list)
 
     def calculate_hellinger_distance(self, p, q):
-        p = np.asarray(p, dtype=np.float)
-        q = np.asarray(q, dtype=np.float)
+        p = np.asarray(p, dtype=np.float64)
+        q = np.asarray(q, dtype=np.float64)
         sqrt_p = np.sqrt(p)
         sqrt_q = np.sqrt(q)
         hellinger_distance = np.sqrt(np.sum((sqrt_p - sqrt_q) ** 2)) / np.sqrt(2)
