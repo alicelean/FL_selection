@@ -505,3 +505,365 @@ Task completed with result: None
 Task completed with result: None
 Task completed with result: None
 Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+
+-----------rl--Round number: 6-------------
+
+Evaluate global model
+Averaged Train Loss: 0.0297
+Averaged Test Accurancy: 0.9897
+Averaged Test AUC: 0.9998
+Std Test Accurancy: 0.0220
+Std Test AUC: 0.0099
+Averaged Train Loss: 1.7705
+Averaged Test Accurancy: 0.4641
+Averaged Test AUC: 0.7951
+Std Test Accurancy: 0.3251
+Std Test AUC: 0.2146
+env output obs: torch.Size([20, 4]) rew 99998.2295419346
+##############################  t is 6 ;obs is tensor([[1.8413e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.4703e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.7850e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.6405e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.9066e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.9427e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.2576e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [8.1888e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.0540e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.3918e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.2293e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [7.2840e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9727e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.5585e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.4752e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [2.6010e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.9281e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.4280e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [6.4429e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [1.0879e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+------------------------------ ep_t is 0,t is 7,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
+obs is :obs tensor([[1.8413e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.4703e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.7850e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.6405e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.9066e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.9427e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.2576e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [8.1888e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.0540e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.3918e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.2293e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [7.2840e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9727e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.5585e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.4752e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [2.6010e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.9281e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.4280e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [6.4429e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [1.0879e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+多维正太分布的动作 log_prob: tensor([-28.5266], grad_fn=<SubBackward0>) tensor([[  82.7624,   41.0999,  109.7817,  129.5468,  -22.2958,   66.5323,
+          -27.4878,  138.9961,   34.6754,  156.1086,   18.3333,  321.2357,
+           21.9079, -130.8078,  173.5985,  258.5024,  349.7302,  199.8376,
+          -28.6535,  362.4222]])
+Actor output action: (1, 20) log_prob torch.Size([1])
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+
+-----------rl--Round number: 7-------------
+
+Evaluate global model
+Averaged Train Loss: 0.0286
+Averaged Test Accurancy: 0.9900
+Averaged Test AUC: 0.9998
+Std Test Accurancy: 0.0218
+Std Test AUC: 0.0099
+Averaged Train Loss: 1.7048
+Averaged Test Accurancy: 0.5004
+Averaged Test AUC: 0.8092
+Std Test Accurancy: 0.3171
+Std Test AUC: 0.2124
+env output obs: torch.Size([20, 4]) rew 99998.29518364614
+##############################  t is 7 ;obs is tensor([[1.7917e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.2287e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.6735e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.1550e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.7966e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.8585e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.1437e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.8475e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.8766e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2927e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.9665e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.9532e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9633e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.5118e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.4315e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [2.1242e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.6105e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.3413e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [6.1926e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [1.0382e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+------------------------------ ep_t is 0,t is 8,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
+obs is :obs tensor([[1.7917e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.2287e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.6735e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.1550e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.7966e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.8585e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.1437e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.8475e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.8766e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2927e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.9665e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.9532e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9633e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.5118e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.4315e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [2.1242e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.6105e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.3413e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [6.1926e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [1.0382e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+多维正太分布的动作 log_prob: tensor([-23.8085], grad_fn=<SubBackward0>) tensor([[  81.7798,   42.1561,  109.2154,  128.3913,  -20.1946,   66.4567,
+          -26.8332,  139.2617,   34.9779,  157.2819,   18.5206,  319.9891,
+           21.0926, -129.5810,  174.5280,  259.0255,  350.9286,  202.2332,
+          -27.2398,  362.5567]])
+Actor output action: (1, 20) log_prob torch.Size([1])
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+
+-----------rl--Round number: 8-------------
+
+Evaluate global model
+Averaged Train Loss: 0.0277
+Averaged Test Accurancy: 0.9900
+Averaged Test AUC: 0.9998
+Std Test Accurancy: 0.0216
+Std Test AUC: 0.0099
+Averaged Train Loss: 1.6549
+Averaged Test Accurancy: 0.5307
+Averaged Test AUC: 0.8200
+Std Test Accurancy: 0.3119
+Std Test AUC: 0.2106
+env output obs: torch.Size([20, 4]) rew 99998.34512706622
+##############################  t is 8 ;obs is tensor([[1.7473e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.0438e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.5778e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [8.7662e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.6976e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.7890e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.0530e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.5626e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.7378e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.7625e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.6453e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9493e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.4732e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.3956e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [1.7986e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.3263e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.2620e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [5.9779e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [9.9525e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+------------------------------ ep_t is 0,t is 9,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
+obs is :obs tensor([[1.7473e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [3.0438e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.5778e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [8.7662e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.6976e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.7890e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.0530e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.5626e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.7378e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.7625e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.6453e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9493e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.4732e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.3956e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [1.7986e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.3263e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.2620e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [5.9779e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [9.9525e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+多维正太分布的动作 log_prob: tensor([-26.6388], grad_fn=<SubBackward0>) tensor([[  82.2284,   40.2129,  107.4347,  128.5662,  -22.6833,   67.6035,
+          -28.0917,  139.3325,   34.1387,  156.4435,   18.6014,  320.5845,
+           22.6493, -131.4830,  173.1882,  259.2111,  350.1147,  202.0751,
+          -26.5963,  363.1400]])
+Actor output action: (1, 20) log_prob torch.Size([1])
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+
+-----------rl--Round number: 9-------------
+
+Evaluate global model
+Averaged Train Loss: 0.0269
+Averaged Test Accurancy: 0.9902
+Averaged Test AUC: 0.9998
+Std Test Accurancy: 0.0215
+Std Test AUC: 0.0096
+Averaged Train Loss: 1.6170
+Averaged Test Accurancy: 0.5564
+Averaged Test AUC: 0.8284
+Std Test Accurancy: 0.3080
+Std Test AUC: 0.2090
+env output obs: torch.Size([20, 4]) rew 99998.38298221935
+##############################  t is 9 ;obs is tensor([[1.7083e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [2.8945e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.4946e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [8.4415e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.6092e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.7301e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [9.7829e+00, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.3289e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.6214e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.1480e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.5977e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.3619e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9338e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.4363e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.3644e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [1.5637e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.0813e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.1918e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [5.7761e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [9.5827e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+------------------------------ ep_t is 0,t is 10,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
+obs is :obs tensor([[1.7083e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
+        [2.8945e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
+        [1.4946e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [8.4415e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.6092e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.7301e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [9.7829e+00, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.3289e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [2.6214e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.1480e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.5977e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
+        [6.3619e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9338e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [1.4363e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
+        [1.3644e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
+        [1.5637e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.0813e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.1918e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
+        [5.7761e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
+        [9.5827e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+多维正太分布的动作 log_prob: tensor([-28.7282], grad_fn=<SubBackward0>) tensor([[  83.4503,   41.9552,  107.9626,  129.0768,  -20.8998,   67.8751,
+          -28.6517,  138.2148,   33.4657,  155.9816,   20.6052,  319.3396,
+           20.7476, -130.7171,  173.3306,  258.8368,  351.7523,  201.6341,
+          -26.8339,  364.0530]])
+Actor output action: (1, 20) log_prob torch.Size([1])
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+Task completed with result: None
+
+-----------rl--Round number: 10-------------
+
+Evaluate global model
+Averaged Train Loss: 0.0262
+Averaged Test Accurancy: 0.9902
+Averaged Test AUC: 0.9998
+Std Test Accurancy: 0.0215
+Std Test AUC: 0.0095
+Averaged Train Loss: 1.5823
+Averaged Test Accurancy: 0.5787
+Averaged Test AUC: 0.8357
+Std Test Accurancy: 0.3033
+Std Test AUC: 0.2076
+env output obs: torch.Size([20, 4]) rew 99998.41772914272
+Traceback (most recent call last):
+  File "/Users/alice/Desktop/python/FL_selection/system/main.py", line 530, in <module>
+    run(args)
+  File "/Users/alice/Desktop/python/FL_selection/system/main.py", line 300, in run
+    server.rl_train()
+  File "/Users/alice/Desktop/python/FL_selection/system/flcore/servers/server_voi.py", line 224, in rl_train
+    batch_obs = torch.tensor(batch_obs, dtype=torch.float)
+ValueError: only one element tensors can be converted to Python scalars
