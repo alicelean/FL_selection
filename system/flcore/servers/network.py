@@ -16,6 +16,9 @@ class FeedForwardNN(nn.Module):
         #如果输入是 numpy 数组，先转换为 PyTorch 张量
         if isinstance(obs, np.ndarray):
             obs = torch.tensor(obs, dtype=torch.float)
+        if isinstance(obs, list):
+            obs = torch.tensor(obs, dtype=torch.float)
+        print("obs is :obs",obs)
         # 展平输入矩阵
         obs = obs.view(-1, self.flatten_size)
         #print(f"Input shape after flattening: {obs.shape}")

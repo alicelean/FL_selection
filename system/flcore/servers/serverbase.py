@@ -398,7 +398,7 @@ class Server(object):
             num_samples.append(ns)
             losses.append(cl*1.0)
             #每个客户端的平均损失？还是总体损失
-            c.loss=(cl*1.0)
+            c.currentloss=(cl*1.0)
             c.avgloss=(cl*1.0)/ns
         ids = [c.id for c in self.clients]
 

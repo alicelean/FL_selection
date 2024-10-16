@@ -15,7 +15,7 @@ class FederatedLearningEnv(gym.Env):
         # 状态空间：每个客户端的状态（如计算能力、数据量、延迟等）
         self.observation_space = spaces.Box(low=0, high=1, shape=(self.num_clients, self.feature), dtype=np.float32)
         # 初始化每个客户端的状态
-        self.client_states = self.initClientStates(self.num_clients, self.feature)
+        #self.client_states = self.initClientStates(self.num_clients, self.feature)
 
 
     def reset(self):
@@ -52,6 +52,6 @@ class FederatedLearningEnv(gym.Env):
 
     def initClientStates(self,num_clients, feature):
         client_states = np.random.rand(num_clients, feature)
-        print("get client states",client_states)
+        print("env initClientStates",client_states)
         return client_states
 

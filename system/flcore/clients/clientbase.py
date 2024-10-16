@@ -29,7 +29,7 @@ class Client(object):
         #客户端的数据量大小
         self.size=0
         #客户端当前的损失值（当前时刻本地模型的客户端损失，这个取决于本地模型的当前状态）
-        self.loss=0
+        self.currentloss=0
         self.avgloss=0
 
         self.current_round = 0
@@ -40,7 +40,7 @@ class Client(object):
         #本地训练中，全局模型的陈旧度，比如全局模型为t1时刻，当前时刻时t2时刻，那么结果就是t2-t1
         self.stale=0
         # 客户端的状态
-        self.states = [self.loss,self.size,self.stale,self.age]
+        self.states = [self.currentloss,self.size,self.stale,self.age]
 
 
 
