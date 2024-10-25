@@ -1,5 +1,5 @@
 /Users/alice/Desktop/python/FL_selection/system /Users/alice/Desktop/python/FL_selection
-2024-10-16 14:54:53.664285: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+2024-10-24 18:00:08.436168: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
 To enable the following instructions: SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
 
 cuda is not avaiable.
@@ -22,7 +22,7 @@ Backbone: dnn
 Using device: cpu
 Using DP: False
 Auto break: False
-Global rounds: 3
+Global rounds: 10
 DLG attack: False
 Total number of new clients: 0
 Fine tuning epoches on new clients: 0
@@ -37,6 +37,46 @@ DNN(
 INFO:------------------------args.algorithm is:FedVOI-----------------------
 self.num_join_clients is 10,client is:20
 ppo init self.obs_dim is 20self.features_dim is 4self.act_dim is 20
+客户端 0: 训练时间 222.13 秒
+客户端 1: 训练时间 198.42 秒
+客户端 2: 训练时间 201.43 秒
+客户端 3: 训练时间 33.61 秒
+客户端 4: 训练时间 134.67 秒
+客户端 5: 训练时间 47.10 秒
+客户端 6: 训练时间 74.02 秒
+客户端 7: 训练时间 131.37 秒
+客户端 8: 训练时间 140.65 秒
+客户端 9: 训练时间 129.10 秒
+客户端 10: 训练时间 128.81 秒
+客户端 11: 训练时间 99.08 秒
+客户端 12: 训练时间 164.45 秒
+客户端 13: 训练时间 34.47 秒
+客户端 14: 训练时间 213.68 秒
+客户端 15: 训练时间 46.22 秒
+客户端 16: 训练时间 169.03 秒
+客户端 17: 训练时间 36.91 秒
+客户端 18: 训练时间 118.16 秒
+客户端 19: 训练时间 118.63 秒
+客户端 0: 通信时间 300.07 秒
+客户端 1: 通信时间 122.87 秒
+客户端 2: 通信时间 125.66 秒
+客户端 3: 通信时间 139.02 秒
+客户端 4: 通信时间 31.34 秒
+客户端 5: 通信时间 1.00 秒
+客户端 6: 通信时间 1.00 秒
+客户端 7: 通信时间 109.69 秒
+客户端 8: 通信时间 25.85 秒
+客户端 9: 通信时间 9.53 秒
+客户端 10: 通信时间 100.76 秒
+客户端 11: 通信时间 159.29 秒
+客户端 12: 通信时间 1.00 秒
+客户端 13: 通信时间 1.00 秒
+客户端 14: 通信时间 1.00 秒
+客户端 15: 通信时间 183.63 秒
+客户端 16: 通信时间 15.80 秒
+客户端 17: 通信时间 60.56 秒
+客户端 18: 通信时间 1.00 秒
+客户端 19: 通信时间 84.37 秒
 **************************1.INfo,set_clients ,init data********************
 train_slow,send_slow 20 [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False] [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 10 args.num_classes
@@ -82,96 +122,12 @@ client base client  19, total_num is 3887,label is [1, 1139, 1, 1, 12, 2731, 1, 
 
 Join ratio / total clients: 0.5 / 20
 Finished creating server and clients.
-Learning... Running 5 timesteps per episode, 10 timesteps per batch for a total of 20000 timesteps
+Learning... Running 2 timesteps per episode, 4 timesteps per batch for a total of 6 timesteps
 ################################################## rl  data start -------
-Averaged Train Loss: 2.3052
-Averaged Test Accurancy: 0.1055
-Averaged Test AUC: 0.5279
-Std Test Accurancy: 0.1455
-Std Test AUC: 0.2172
-##############################  t is 0 ;obs is tensor([[ 4087.1609,  2370.0000,     0.0000,     0.0000],
-        [ 4660.5942,  2612.0000,     0.0000,     0.0000],
-        [  897.8027,   534.0000,     0.0000,     0.0000],
-        [ 3986.0364,  2184.0000,     0.0000,     0.0000],
-        [12628.3857,  8040.0000,     0.0000,     0.0000],
-        [ 6338.2490,  3748.0000,     0.0000,     0.0000],
-        [13889.6387,  7980.0000,     0.0000,     0.0000],
-        [ 2345.4529,  1414.0000,     0.0000,     0.0000],
-        [  642.8575,   362.0000,     0.0000,     0.0000],
-        [ 6564.4683,  4040.0000,     0.0000,     0.0000],
-        [ 4017.7693,  2386.0000,     0.0000,     0.0000],
-        [ 8739.7793,  5184.0000,     0.0000,     0.0000],
-        [ 9247.5918,  4995.0000,     0.0000,     0.0000],
-        [ 2244.3186,  1215.0000,     0.0000,     0.0000],
-        [ 5273.7295,  3157.0000,     0.0000,     0.0000],
-        [  122.9598,    78.0000,     0.0000,     0.0000],
-        [ 9162.5049,  4995.0000,     0.0000,     0.0000],
-        [11770.9531,  6947.0000,     0.0000,     0.0000],
-        [ 7157.8530,  3872.0000,     0.0000,     0.0000],
-        [ 7038.3096,  3887.0000,     0.0000,     0.0000]])
------------------------------- ep_t is 0,t is 1,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[ 4087.1609,  2370.0000,     0.0000,     0.0000],
-        [ 4660.5942,  2612.0000,     0.0000,     0.0000],
-        [  897.8027,   534.0000,     0.0000,     0.0000],
-        [ 3986.0364,  2184.0000,     0.0000,     0.0000],
-        [12628.3857,  8040.0000,     0.0000,     0.0000],
-        [ 6338.2490,  3748.0000,     0.0000,     0.0000],
-        [13889.6387,  7980.0000,     0.0000,     0.0000],
-        [ 2345.4529,  1414.0000,     0.0000,     0.0000],
-        [  642.8575,   362.0000,     0.0000,     0.0000],
-        [ 6564.4683,  4040.0000,     0.0000,     0.0000],
-        [ 4017.7693,  2386.0000,     0.0000,     0.0000],
-        [ 8739.7793,  5184.0000,     0.0000,     0.0000],
-        [ 9247.5918,  4995.0000,     0.0000,     0.0000],
-        [ 2244.3186,  1215.0000,     0.0000,     0.0000],
-        [ 5273.7295,  3157.0000,     0.0000,     0.0000],
-        [  122.9598,    78.0000,     0.0000,     0.0000],
-        [ 9162.5049,  4995.0000,     0.0000,     0.0000],
-        [11770.9531,  6947.0000,     0.0000,     0.0000],
-        [ 7157.8530,  3872.0000,     0.0000,     0.0000],
-        [ 7038.3096,  3887.0000,     0.0000,     0.0000]])
-多维正太分布的动作 log_prob: tensor([-20.4143], grad_fn=<SubBackward0>) tensor([[ -56.2562,   55.4977, -133.3015,  194.0116, -124.2947,  734.4246,
-         -210.1106,  251.2579, -203.4953,  387.6728,  -46.8173,  354.5332,
-           64.2127, -497.4879,  100.0084,  508.3790,  170.5813,  223.3410,
-           98.0833,  472.5072]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-
------------rl--Round number: 1-------------
-
-Evaluate global model
-Averaged Train Loss: 0.0466
-Averaged Test Accurancy: 0.9851
-Averaged Test AUC: 0.9997
-Std Test Accurancy: 0.0234
-Std Test AUC: 0.0083
-Averaged Train Loss: 2.7057
-Averaged Test Accurancy: 0.2119
-Averaged Test AUC: 0.5972
-Std Test Accurancy: 0.3346
-Std Test AUC: 0.2748
-env output obs: torch.Size([20, 4]) rew 99997.29433390552
------------------------------- ep_t is 1,t is 2,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[ 262.7002, 2370.0000,    0.0000,    0.0000],
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 1 ;env state is tensor([[ 262.7002, 2370.0000,    0.0000,    0.0000],
         [  96.1508, 2612.0000,    0.0000,    0.0000],
         [  37.6114,  534.0000,    0.0000,    0.0000],
         [ 168.2127, 2184.0000,    0.0000,    0.0000],
@@ -191,679 +147,364 @@ obs is :obs tensor([[ 262.7002, 2370.0000,    0.0000,    0.0000],
         [  83.2992, 6947.0000,    0.0000,    0.0000],
         [ 137.6815, 3872.0000,    0.0000,    0.0000],
         [ 157.3956, 3887.0000,    0.0000,    0.0000]])
-多维正太分布的动作 log_prob: tensor([-24.5631], grad_fn=<SubBackward0>) tensor([[  82.1769,   37.6152,  105.8344,  131.1662,  -21.5962,   67.8227,
-          -32.2131,  135.6602,   30.3071,  159.7480,   18.0146,  322.4268,
-           24.4042, -133.2827,  171.7613,  262.3992,  349.1751,  208.1248,
-          -30.0953,  364.4110]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+action: [[  81.076614   37.189857  105.95314   133.38821   -20.992777   66.579124
+   -30.97095   136.32892    33.378807  158.44244    18.421543  322.8944
+    25.116808 -133.61595   171.51636   262.14307   350.66568   206.64662
+   -28.971735  362.21796 ]] prob tensor([-24.4044])
+send select message to client ,select client id  is : [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 0, t is 1 -Round : 1，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 2.1744
+Averaged Test Accurancy: 0.2262
+Averaged Test AUC: 0.6292
+Std Test Accurancy: 0.3304
+Std Test AUC: 0.2772
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 7.825649663740569
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 2 ;env state is tensor([[2.2714e+02, 2.3700e+03, 0.0000e+00, 1.0000e+00],
+        [6.3481e+01, 2.6120e+03, 0.0000e+00, 1.0000e+00],
+        [2.8257e+01, 5.3400e+02, 0.0000e+00, 1.0000e+00],
+        [1.3459e+02, 2.1840e+03, 0.0000e+00, 1.0000e+00],
+        [3.7561e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [3.3264e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [2.2334e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [1.0952e+02, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [5.4323e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [2.8843e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [6.5248e+01, 2.3860e+03, 0.0000e+00, 1.0000e+00],
+        [8.7956e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9951e+02, 4.9950e+03, 0.0000e+00, 1.0000e+00],
+        [3.1010e+01, 1.2150e+03, 0.0000e+00, 1.0000e+00],
+        [1.8578e+02, 3.1570e+03, 0.0000e+00, 1.0000e+00],
+        [9.0559e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [6.4323e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [8.0450e+01, 6.9470e+03, 0.0000e+00, 1.0000e+00],
+        [9.2224e+01, 3.8720e+03, 0.0000e+00, 1.0000e+00],
+        [1.4048e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[  81.41929    38.393944  106.707466  131.07169   -21.722277   67.178894
+   -30.622683  137.22351    32.919147  156.28932    19.686459  320.98303
+    23.131626 -132.7524    171.1255    259.90326   350.7384    204.89827
+   -27.943468  362.33923 ]] prob tensor([-19.1651])
+send select message to client ,select client id  is : [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 1, t is 2 -Round : 2，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 2.2046
+Averaged Test Accurancy: 0.2786
+Averaged Test AUC: 0.6758
+Std Test Accurancy: 0.3291
+Std Test AUC: 0.2617
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 7.795387602108589
+one tragtory collected---------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 3 ;env state is tensor([[2.1334e+02, 2.3700e+03, 0.0000e+00, 2.0000e+00],
+        [5.0937e+01, 2.6120e+03, 0.0000e+00, 2.0000e+00],
+        [2.4700e+01, 5.3400e+02, 0.0000e+00, 2.0000e+00],
+        [1.2090e+02, 2.1840e+03, 0.0000e+00, 2.0000e+00],
+        [3.4507e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [2.8015e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.9648e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [9.8471e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [4.4123e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [2.0395e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [5.8143e+01, 2.3860e+03, 0.0000e+00, 2.0000e+00],
+        [8.0868e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9790e+02, 4.9950e+03, 0.0000e+00, 2.0000e+00],
+        [2.2681e+01, 1.2150e+03, 0.0000e+00, 2.0000e+00],
+        [1.7268e+02, 3.1570e+03, 0.0000e+00, 2.0000e+00],
+        [6.2206e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [5.7166e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.8789e+01, 6.9470e+03, 0.0000e+00, 2.0000e+00],
+        [7.9687e+01, 3.8720e+03, 0.0000e+00, 2.0000e+00],
+        [1.2736e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[  80.70931    39.509117  107.14244   129.81007   -21.4569     67.52283
+   -28.072906  138.30743    35.14131   156.73604    19.290358  320.94223
+    22.188942 -131.80595   172.46428   259.07184   351.20734   204.28322
+   -27.419027  363.65906 ]] prob tensor([-19.3884])
+send select message to client ,select client id  is : [19, 16, 11, 3, 4, 5, 6, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 0, t is 3 -Round : 3，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 2.0894
+Averaged Test Accurancy: 0.3368
+Averaged Test AUC: 0.7181
+Std Test Accurancy: 0.3429
+Std Test AUC: 0.2506
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 7.910594532717971
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 4 ;env state is tensor([[2.0478e+02, 2.3700e+03, 0.0000e+00, 3.0000e+00],
+        [4.3745e+01, 2.6120e+03, 0.0000e+00, 3.0000e+00],
+        [2.2360e+01, 5.3400e+02, 0.0000e+00, 3.0000e+00],
+        [1.1039e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [3.2502e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [2.5113e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.7014e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [9.1075e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.8335e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.7026e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [5.2926e+01, 2.3860e+03, 0.0000e+00, 3.0000e+00],
+        [7.5855e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9621e+02, 4.9950e+03, 0.0000e+00, 3.0000e+00],
+        [1.9370e+01, 1.2150e+03, 0.0000e+00, 3.0000e+00],
+        [1.6376e+02, 3.1570e+03, 0.0000e+00, 3.0000e+00],
+        [4.4760e+00, 7.8000e+01, 0.0000e+00, 1.0000e+00],
+        [5.1892e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.7760e+01, 6.9470e+03, 0.0000e+00, 3.0000e+00],
+        [7.3288e+01, 3.8720e+03, 0.0000e+00, 3.0000e+00],
+        [1.1766e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[  82.50632    40.974667  108.161865  129.16539   -22.037952   67.85156
+   -29.640293  137.51962    34.009197  154.92007    19.440594  320.3886
+    22.163282 -131.14955   172.39082   259.9652    351.06714   204.171
+   -27.626629  363.66275 ]] prob tensor([-19.0332])
+send select message to client ,select client id  is : [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 1, t is 4 -Round : 4，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 1.9874
+Averaged Test Accurancy: 0.3813
+Averaged Test AUC: 0.7479
+Std Test Accurancy: 0.3423
+Std Test AUC: 0.2424
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 8.012571584849667
+one tragtory collected---------
+batch_lens shape is : [2, 2]
+############################## rl data collection success-t_so_far is 4,i_so_far is 1-,update network-----
+update onece time is : 0.10229086875915527
 
------------rl--Round number: 2-------------
+-------------------- Iteration #1 --------------------
+Average Episodic Length: 2.0
+Average Episodic Return: 15.77
+Average Loss: 0.32573
+Timesteps So Far: 4
+Iteration took: 248.4 secs
+------------------------------------------------------
 
-Evaluate global model
-Averaged Train Loss: 0.0384
-Averaged Test Accurancy: 0.9870
-Averaged Test AUC: 0.9997
-Std Test Accurancy: 0.0234
-Std Test AUC: 0.0101
-Averaged Train Loss: 2.4861
-Averaged Test Accurancy: 0.2561
-Averaged Test AUC: 0.6454
-Std Test Accurancy: 0.3282
-Std Test AUC: 0.2595
-env output obs: torch.Size([20, 4]) rew 99997.51393370176
------------------------------- ep_t is 2,t is 3,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[ 222.6790, 2370.0000,    0.0000,    0.0000],
-        [  62.7038, 2612.0000,    0.0000,    0.0000],
-        [  26.6193,  534.0000,    0.0000,    0.0000],
-        [ 135.7202, 2184.0000,    0.0000,    0.0000],
-        [ 369.8685, 8040.0000,    0.0000,    0.0000],
-        [  29.2608, 3748.0000,    0.0000,    0.0000],
-        [  22.0485, 7980.0000,    0.0000,    0.0000],
-        [ 111.1810, 1414.0000,    0.0000,    0.0000],
-        [  51.6290,  362.0000,    0.0000,    0.0000],
-        [  28.9816, 4040.0000,    0.0000,    0.0000],
-        [  63.6135, 2386.0000,    0.0000,    0.0000],
-        [  92.3597, 5184.0000,    0.0000,    0.0000],
-        [ 202.3160, 4995.0000,    0.0000,    0.0000],
-        [  24.7777, 1215.0000,    0.0000,    0.0000],
-        [ 182.8291, 3157.0000,    0.0000,    0.0000],
-        [   9.3949,   78.0000,    0.0000,    0.0000],
-        [  70.4784, 4995.0000,    0.0000,    0.0000],
-        [  79.6947, 6947.0000,    0.0000,    0.0000],
-        [  86.6566, 3872.0000,    0.0000,    0.0000],
-        [ 142.0500, 3887.0000,    0.0000,    0.0000]])
-多维正太分布的动作 log_prob: tensor([-18.1638], grad_fn=<SubBackward0>) tensor([[  81.4893,   37.7114,  107.1053,  129.6373,  -21.0464,   65.8138,
-          -29.0613,  137.6661,   33.3977,  156.9066,   18.5643,  320.3875,
-           23.0702, -131.9856,  172.4743,  259.8867,  350.6690,  204.4148,
-          -29.1565,  363.7096]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+################################################## rl  data start -------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 5 ;env state is tensor([[1.9816e+02, 2.3700e+03, 0.0000e+00, 4.0000e+00],
+        [3.9466e+01, 2.6120e+03, 0.0000e+00, 4.0000e+00],
+        [2.0746e+01, 5.3400e+02, 0.0000e+00, 4.0000e+00],
+        [1.0299e+02, 2.1840e+03, 0.0000e+00, 1.0000e+00],
+        [3.0906e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [2.3220e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.4722e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [8.5774e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.4933e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.5129e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.8863e+01, 2.3860e+03, 0.0000e+00, 4.0000e+00],
+        [7.1786e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9480e+02, 4.9950e+03, 0.0000e+00, 4.0000e+00],
+        [1.7559e+01, 1.2150e+03, 0.0000e+00, 4.0000e+00],
+        [1.5699e+02, 3.1570e+03, 0.0000e+00, 4.0000e+00],
+        [3.4317e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
+        [4.7672e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
+        [7.6749e+01, 6.9470e+03, 0.0000e+00, 4.0000e+00],
+        [6.8973e+01, 3.8720e+03, 0.0000e+00, 4.0000e+00],
+        [1.1018e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[-137.26855     9.946985  162.97118   173.53201    69.66217   102.4489
+   527.471     409.80777   353.2874    390.77274  -159.8534    577.70135
+   138.6502   -173.05399   442.40833   256.9495    449.7666    126.36823
+   138.08478   489.92117 ]] prob tensor([-24.0109])
+send select message to client ,select client id  is : [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 0, t is 1 -Round : 5，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 1.9240
+Averaged Test Accurancy: 0.4231
+Averaged Test AUC: 0.7678
+Std Test Accurancy: 0.3356
+Std Test AUC: 0.2358
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 8.075999439547385
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 6 ;env state is tensor([[1.9286e+02, 2.3700e+03, 0.0000e+00, 5.0000e+00],
+        [3.6495e+01, 2.6120e+03, 0.0000e+00, 5.0000e+00],
+        [1.9405e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.7038e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.9587e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [2.1830e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.2993e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [8.1751e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.2729e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.3855e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.5527e+01, 2.3860e+03, 0.0000e+00, 5.0000e+00],
+        [6.8098e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9325e+02, 4.9950e+03, 0.0000e+00, 5.0000e+00],
+        [1.6435e+01, 1.2150e+03, 0.0000e+00, 5.0000e+00],
+        [1.5151e+02, 3.1570e+03, 0.0000e+00, 5.0000e+00],
+        [2.7309e+00, 7.8000e+01, 0.0000e+00, 1.0000e+00],
+        [4.4530e+01, 4.9950e+03, 0.0000e+00, 1.0000e+00],
+        [7.5722e+01, 6.9470e+03, 0.0000e+00, 5.0000e+00],
+        [6.5581e+01, 3.8720e+03, 0.0000e+00, 5.0000e+00],
+        [1.0414e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[-136.23347    11.402835  162.86772   172.43195    68.17689   101.54487
+   527.6424    408.4727    352.94064   388.78345  -158.65901   575.7402
+   139.05862  -173.2339    441.6265    256.3063    449.97308   126.97562
+   137.80362   491.552   ]] prob tensor([-21.9339])
+send select message to client ,select client id  is : [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 1, t is 2 -Round : 6，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 1.8789
+Averaged Test Accurancy: 0.4551
+Averaged Test AUC: 0.7823
+Std Test Accurancy: 0.3344
+Std Test AUC: 0.2312
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 8.121080722133392
+one tragtory collected---------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 7 ;env state is tensor([[1.8820e+02, 2.3700e+03, 0.0000e+00, 6.0000e+00],
+        [3.4314e+01, 2.6120e+03, 0.0000e+00, 6.0000e+00],
+        [1.8313e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [9.2115e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.8452e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [2.0727e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.1703e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.8548e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.1194e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2866e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.2749e+01, 2.3860e+03, 0.0000e+00, 6.0000e+00],
+        [6.4827e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9201e+02, 4.9950e+03, 0.0000e+00, 6.0000e+00],
+        [1.5648e+01, 1.2150e+03, 0.0000e+00, 6.0000e+00],
+        [1.4710e+02, 3.1570e+03, 0.0000e+00, 6.0000e+00],
+        [2.2668e+00, 7.8000e+01, 0.0000e+00, 2.0000e+00],
+        [4.2047e+01, 4.9950e+03, 0.0000e+00, 2.0000e+00],
+        [7.4698e+01, 6.9470e+03, 0.0000e+00, 6.0000e+00],
+        [6.2656e+01, 3.8720e+03, 0.0000e+00, 6.0000e+00],
+        [9.9156e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[-136.3316      11.5832405  163.39949    173.35796     68.586174
+   102.573044   526.97266    409.31076    353.92825    391.13412
+  -159.8372     578.024      138.79245   -173.48012    442.27243
+   256.8952     451.51312    127.07412    137.34105    491.42224  ]] prob tensor([-14.9890])
+send select message to client ,select client id  is : [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 0, t is 3 -Round : 7，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 1.8443
+Averaged Test Accurancy: 0.4833
+Averaged Test AUC: 0.7935
+Std Test Accurancy: 0.3385
+Std Test AUC: 0.2279
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 8.15570449010636
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global moedl send to all client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client start local training
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ all client end local training 
+##############################  round is 8 ;env state is tensor([[1.8407e+02, 2.3700e+03, 0.0000e+00, 7.0000e+00],
+        [3.2661e+01, 2.6120e+03, 0.0000e+00, 7.0000e+00],
+        [1.7338e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
+        [8.7990e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
+        [2.7409e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
+        [1.9810e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
+        [1.0715e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
+        [7.5840e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
+        [3.0015e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
+        [1.2063e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
+        [4.0457e+01, 2.3860e+03, 0.0000e+00, 7.0000e+00],
+        [6.1885e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
+        [1.9057e+02, 4.9950e+03, 0.0000e+00, 7.0000e+00],
+        [1.5106e+01, 1.2150e+03, 0.0000e+00, 7.0000e+00],
+        [1.4319e+02, 3.1570e+03, 0.0000e+00, 7.0000e+00],
+        [1.9426e+00, 7.8000e+01, 0.0000e+00, 3.0000e+00],
+        [4.0051e+01, 4.9950e+03, 0.0000e+00, 3.0000e+00],
+        [7.3682e+01, 6.9470e+03, 0.0000e+00, 7.0000e+00],
+        [6.0272e+01, 3.8720e+03, 0.0000e+00, 7.0000e+00],
+        [9.4885e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
+action: [[-136.69914    12.457571  163.53432   173.27046    70.161026  103.85187
+   527.3369    410.08044   353.57007   390.93393  -159.32965   576.5248
+   138.11316  -173.20648   441.72745   255.31935   450.586     127.28545
+   138.47095   491.52072 ]] prob tensor([-22.3982])
+send select message to client ,select client id  is : [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
+-------------------------------------------------- ------ep_t is 1, t is 4 -Round : 8，Evaluate global mode------------- --------------------------------------------------
+Averaged Train Loss: 1.8179
+Averaged Test Accurancy: 0.5032
+Averaged Test AUC: 0.8023
+Std Test Accurancy: 0.3435
+Std Test AUC: 0.2252
+------------------------------ --------------------- ------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  action reward is 8.18207046226052
+one tragtory collected---------
+batch_lens shape is : [2, 2]
+############################## rl data collection success-t_so_far is 8,i_so_far is 2-,update network-----
+update onece time is : 0.12688302993774414
 
------------rl--Round number: 3-------------
+-------------------- Iteration #2 --------------------
+Average Episodic Length: 2.0
+Average Episodic Return: 16.27
+Average Loss: 0.34286
+Timesteps So Far: 8
+Iteration took: 300.62 secs
+------------------------------------------------------
 
-Evaluate global model
-Averaged Train Loss: 0.0349
-Averaged Test Accurancy: 0.9880
-Averaged Test AUC: 0.9997
-Std Test Accurancy: 0.0219
-Std Test AUC: 0.0105
-Averaged Train Loss: 2.2162
-Averaged Test Accurancy: 0.3276
-Averaged Test AUC: 0.7000
-Std Test Accurancy: 0.3398
-Std Test AUC: 0.2405
-env output obs: torch.Size([20, 4]) rew 99997.78377030048
-##############################  t is 3 ;obs is tensor([[2.0706e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [4.9809e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [2.3055e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.2078e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.3850e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.4504e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.9151e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [9.9947e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [4.1677e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [2.0640e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [5.5562e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [8.5985e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.0108e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.9222e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.6890e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [6.2181e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [6.2935e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.7477e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [7.6649e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.3097e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 4,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[2.0706e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [4.9809e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [2.3055e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.2078e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.3850e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.4504e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.9151e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [9.9947e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [4.1677e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [2.0640e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [5.5562e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [8.5985e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.0108e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.9222e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.6890e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [6.2181e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [6.2935e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.7477e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [7.6649e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.3097e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-22.3696], grad_fn=<SubBackward0>) tensor([[  80.6956,   39.5001,  108.5532,  128.8201,  -20.7348,   67.2694,
-          -28.7978,  137.2677,   33.5206,  156.0458,   20.4971,  321.8503,
-           23.1103, -130.9487,  172.1853,  260.3408,  350.0841,  202.3172,
-          -28.8227,  363.7359]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+rl,training is over!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
 
------------rl--Round number: 4-------------
-
-Evaluate global model
-Averaged Train Loss: 0.0327
-Averaged Test Accurancy: 0.9889
-Averaged Test AUC: 0.9997
-Std Test Accurancy: 0.0221
-Std Test AUC: 0.0107
-Averaged Train Loss: 2.0173
-Averaged Test Accurancy: 0.3746
-Averaged Test AUC: 0.7442
-Std Test Accurancy: 0.3457
-Std Test AUC: 0.2256
-env output obs: torch.Size([20, 4]) rew 99997.98271503384
-##############################  t is 4 ;obs is tensor([[1.9735e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [4.2586e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [2.0816e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.0987e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.1863e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.2062e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.6300e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [9.1969e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.6275e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.7148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.9831e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [8.0918e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9968e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.7249e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.5960e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [4.4443e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [5.7353e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.6136e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [7.1334e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.2195e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 5,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.9735e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [4.2586e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [2.0816e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.0987e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.1863e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.2062e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.6300e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [9.1969e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.6275e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.7148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.9831e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [8.0918e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9968e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.7249e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.5960e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [4.4443e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [5.7353e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.6136e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [7.1334e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.2195e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-21.2559], grad_fn=<SubBackward0>) tensor([[  81.8000,   40.5072,  108.4903,  128.3465,  -21.5536,   67.8572,
-          -29.1606,  137.7511,   33.2969,  154.1098,   18.8319,  320.7144,
-           22.1752, -131.4599,  173.7796,  258.4815,  350.6961,  202.3697,
-          -27.1606,  362.8784]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-
------------rl--Round number: 5-------------
-
-Evaluate global model
-Averaged Train Loss: 0.0310
-Averaged Test Accurancy: 0.9893
-Averaged Test AUC: 0.9997
-Std Test Accurancy: 0.0221
-Std Test AUC: 0.0101
-Averaged Train Loss: 1.8638
-Averaged Test Accurancy: 0.4232
-Averaged Test AUC: 0.7753
-Std Test Accurancy: 0.3354
-Std Test AUC: 0.2183
-env output obs: torch.Size([20, 4]) rew 99998.13617737919
-##############################  t is 5 ;obs is tensor([[1.9001e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.7998e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.9171e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.0234e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.0343e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.0525e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.4106e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [8.6211e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.2915e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.5203e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.5583e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [7.6583e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9862e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.6245e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.5281e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [3.3146e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [5.2990e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.5242e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.7504e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.1479e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 6,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.9001e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.7998e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.9171e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [1.0234e+02, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [3.0343e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [2.0525e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.4106e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [8.6211e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.2915e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.5203e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.5583e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [7.6583e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9862e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.6245e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.5281e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [3.3146e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [5.2990e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.5242e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.7504e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.1479e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-21.8123], grad_fn=<SubBackward0>) tensor([[  82.2258,   40.8261,  108.9845,  128.5912,  -20.8490,   65.7702,
-          -27.8923,  137.8235,   35.4905,  156.9940,   19.3361,  320.3017,
-           23.2448, -130.7343,  173.4576,  260.0261,  349.6635,  201.2284,
-          -27.5101,  363.2130]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-
------------rl--Round number: 6-------------
+-------------Training  Round number: 9-------------
 
 Evaluate global model
-Averaged Train Loss: 0.0297
-Averaged Test Accurancy: 0.9897
-Averaged Test AUC: 0.9998
-Std Test Accurancy: 0.0220
-Std Test AUC: 0.0099
-Averaged Train Loss: 1.7705
-Averaged Test Accurancy: 0.4641
-Averaged Test AUC: 0.7951
-Std Test Accurancy: 0.3251
-Std Test AUC: 0.2146
-env output obs: torch.Size([20, 4]) rew 99998.2295419346
-##############################  t is 6 ;obs is tensor([[1.8413e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.4703e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.7850e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [9.6405e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.9066e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.9427e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.2576e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [8.1888e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.0540e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.3918e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.2293e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [7.2840e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9727e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.5585e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.4752e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [2.6010e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.9281e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.4280e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.4429e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.0879e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 7,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.8413e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.4703e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.7850e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [9.6405e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.9066e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.9427e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.2576e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [8.1888e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [3.0540e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.3918e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [4.2293e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [7.2840e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9727e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.5585e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.4752e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [2.6010e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.9281e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.4280e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.4429e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.0879e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-28.5266], grad_fn=<SubBackward0>) tensor([[  82.7624,   41.0999,  109.7817,  129.5468,  -22.2958,   66.5323,
-          -27.4878,  138.9961,   34.6754,  156.1086,   18.3333,  321.2357,
-           21.9079, -130.8078,  173.5985,  258.5024,  349.7302,  199.8376,
-          -28.6535,  362.4222]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+Averaged Train Loss: 1.7823
+Averaged Test Accurancy: 0.5223
+Averaged Test AUC: 0.8122
+Std Test Accurancy: 0.3389
+Std Test AUC: 0.2206
+res is: ['mnist', 'FedVOI', 9, 1.78225442334152, 0.52225078548986, 0.8122300350941164, 0.3389155447866385, 0.22059285268780074, 181.07903904559686]
+------------------------- Round is  9 ------------------------- time cost ------------------------- 86.20355820655823
+------------------------- Budget is : [61.84230184555054, 60.45597195625305, 59.76059889793396, 64.19287395477295, 72.00348401069641, 71.75590705871582, 73.903146982193, 82.82518100738525, 86.20355820655823]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ global model aggragation and  send  to client 
 
------------rl--Round number: 7-------------
+-------------Training  Round number: 10-------------
 
 Evaluate global model
-Averaged Train Loss: 0.0286
-Averaged Test Accurancy: 0.9900
-Averaged Test AUC: 0.9998
-Std Test Accurancy: 0.0218
-Std Test AUC: 0.0099
-Averaged Train Loss: 1.7048
-Averaged Test Accurancy: 0.5004
-Averaged Test AUC: 0.8092
-Std Test Accurancy: 0.3171
-Std Test AUC: 0.2124
-env output obs: torch.Size([20, 4]) rew 99998.29518364614
-##############################  t is 7 ;obs is tensor([[1.7917e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.2287e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.6735e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [9.1550e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.7966e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.8585e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.1437e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.8475e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.8766e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.2927e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.9665e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.9532e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9633e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.5118e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.4315e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [2.1242e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.6105e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.3413e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.1926e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.0382e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 8,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.7917e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.2287e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.6735e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [9.1550e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.7966e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.8585e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.1437e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.8475e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.8766e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.2927e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.9665e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.9532e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9633e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.5118e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.4315e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [2.1242e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.6105e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.3413e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [6.1926e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [1.0382e+02, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-23.8085], grad_fn=<SubBackward0>) tensor([[  81.7798,   42.1561,  109.2154,  128.3913,  -20.1946,   66.4567,
-          -26.8332,  139.2617,   34.9779,  157.2819,   18.5206,  319.9891,
-           21.0926, -129.5810,  174.5280,  259.0255,  350.9286,  202.2332,
-          -27.2398,  362.5567]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+Averaged Train Loss: 1.7496
+Averaged Test Accurancy: 0.5438
+Averaged Test AUC: 0.8211
+Std Test Accurancy: 0.3236
+Std Test AUC: 0.2164
+res is: ['mnist', 'FedVOI', 10, 1.749556791545719, 0.5438446158240503, 0.821057421424575, 0.3235623406599308, 0.21638947175432313, 178.19314489644913]
+------------------------- Round is  10 ------------------------- time cost ------------------------- 83.30786395072937
+------------------------- Budget is : [61.84230184555054, 60.45597195625305, 59.76059889793396, 64.19287395477295, 72.00348401069641, 71.75590705871582, 73.903146982193, 82.82518100738525, 86.20355820655823, 83.30786395072937]
 
------------rl--Round number: 8-------------
+Best accuracy.
+0.5438446158240503
 
-Evaluate global model
-Averaged Train Loss: 0.0277
-Averaged Test Accurancy: 0.9900
-Averaged Test AUC: 0.9998
-Std Test Accurancy: 0.0216
-Std Test AUC: 0.0099
-Averaged Train Loss: 1.6549
-Averaged Test Accurancy: 0.5307
-Averaged Test AUC: 0.8200
-Std Test Accurancy: 0.3119
-Std Test AUC: 0.2106
-env output obs: torch.Size([20, 4]) rew 99998.34512706622
-##############################  t is 8 ;obs is tensor([[1.7473e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.0438e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.5778e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [8.7662e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.6976e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.7890e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.0530e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.5626e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.7378e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.2148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.7625e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.6453e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9493e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.4732e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.3956e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [1.7986e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.3263e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.2620e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [5.9779e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [9.9525e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 9,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.7473e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [3.0438e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.5778e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [8.7662e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.6976e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.7890e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [1.0530e+01, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.5626e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.7378e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.2148e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.7625e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.6453e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9493e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.4732e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.3956e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [1.7986e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.3263e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.2620e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [5.9779e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [9.9525e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-26.6388], grad_fn=<SubBackward0>) tensor([[  82.2284,   40.2129,  107.4347,  128.5662,  -22.6833,   67.6035,
-          -28.0917,  139.3325,   34.1387,  156.4435,   18.6014,  320.5845,
-           22.6493, -131.4830,  173.1882,  259.2111,  350.1147,  202.0751,
-          -26.5963,  363.1400]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
+Average time cost per round.
+72.71206511391534
+select_id value is, [[1, [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]], [2, [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]], [3, [19, 16, 11, 3, 4, 5, 6, 7, 8, 9]], [4, [19, 16, 11, 15, 4, 5, 6, 7, 8, 9]], [5, [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]], [6, [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]], [7, [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]], [8, [11, 6, 19, 3, 4, 5, 2, 7, 8, 9]], [9, [19, 16, 2, 3, 4, 5, 6, 7, 8, 9]], [10, [19, 16, 2, 3, 4, 5, 6, 7, 8, 9]]]
+write select id list  /Users/alice/Desktop/python/FL_selection//res/selectids/mnist_select_client_ids20_0.5.csv
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+colum_value 10
+success training write acc txt /Users/alice/Desktop/python/FL_selection//res/FedVOI/mnist_acc.csv /Users/alice/Desktop/python/FL_selection//res/ mnist_allacc_0.5_20_0.05.csv
+success training write acc txt /Users/alice/Desktop/python/FL_selection//res/timeCost_mnist0.05.csv
+File path: ../results/mnist_FedVOI_dnn_0.h5
 
------------rl--Round number: 9-------------
+Average time cost: 718.76s.
+Length:  10
+std for best accurancy: 0.0
+mean for best accurancy: 0.5438446158240503
+All done!
 
-Evaluate global model
-Averaged Train Loss: 0.0269
-Averaged Test Accurancy: 0.9902
-Averaged Test AUC: 0.9998
-Std Test Accurancy: 0.0215
-Std Test AUC: 0.0096
-Averaged Train Loss: 1.6170
-Averaged Test Accurancy: 0.5564
-Averaged Test AUC: 0.8284
-Std Test Accurancy: 0.3080
-Std Test AUC: 0.2090
-env output obs: torch.Size([20, 4]) rew 99998.38298221935
-##############################  t is 9 ;obs is tensor([[1.7083e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [2.8945e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.4946e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [8.4415e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.6092e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.7301e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [9.7829e+00, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.3289e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.6214e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.1480e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.5977e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.3619e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9338e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.4363e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.3644e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [1.5637e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.0813e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.1918e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [5.7761e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [9.5827e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
------------------------------- ep_t is 0,t is 10,self.max_timesteps_per_episode is 5,self.timesteps_per_batch is 10
-obs is :obs tensor([[1.7083e+02, 2.3700e+03, 0.0000e+00, 0.0000e+00],
-        [2.8945e+01, 2.6120e+03, 0.0000e+00, 0.0000e+00],
-        [1.4946e+01, 5.3400e+02, 0.0000e+00, 0.0000e+00],
-        [8.4415e+01, 2.1840e+03, 0.0000e+00, 0.0000e+00],
-        [2.6092e+02, 8.0400e+03, 0.0000e+00, 0.0000e+00],
-        [1.7301e+01, 3.7480e+03, 0.0000e+00, 0.0000e+00],
-        [9.7829e+00, 7.9800e+03, 0.0000e+00, 0.0000e+00],
-        [7.3289e+01, 1.4140e+03, 0.0000e+00, 0.0000e+00],
-        [2.6214e+01, 3.6200e+02, 0.0000e+00, 0.0000e+00],
-        [1.1480e+01, 4.0400e+03, 0.0000e+00, 0.0000e+00],
-        [3.5977e+01, 2.3860e+03, 0.0000e+00, 0.0000e+00],
-        [6.3619e+01, 5.1840e+03, 0.0000e+00, 0.0000e+00],
-        [1.9338e+02, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [1.4363e+01, 1.2150e+03, 0.0000e+00, 0.0000e+00],
-        [1.3644e+02, 3.1570e+03, 0.0000e+00, 0.0000e+00],
-        [1.5637e+00, 7.8000e+01, 0.0000e+00, 0.0000e+00],
-        [4.0813e+01, 4.9950e+03, 0.0000e+00, 0.0000e+00],
-        [7.1918e+01, 6.9470e+03, 0.0000e+00, 0.0000e+00],
-        [5.7761e+01, 3.8720e+03, 0.0000e+00, 0.0000e+00],
-        [9.5827e+01, 3.8870e+03, 0.0000e+00, 0.0000e+00]])
-多维正太分布的动作 log_prob: tensor([-28.7282], grad_fn=<SubBackward0>) tensor([[  83.4503,   41.9552,  107.9626,  129.0768,  -20.8998,   67.8751,
-          -28.6517,  138.2148,   33.4657,  155.9816,   20.6052,  319.3396,
-           20.7476, -130.7171,  173.3306,  258.8368,  351.7523,  201.6341,
-          -26.8339,  364.0530]])
-Actor output action: (1, 20) log_prob torch.Size([1])
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-Task completed with result: None
-
------------rl--Round number: 10-------------
-
-Evaluate global model
-Averaged Train Loss: 0.0262
-Averaged Test Accurancy: 0.9902
-Averaged Test AUC: 0.9998
-Std Test Accurancy: 0.0215
-Std Test AUC: 0.0095
-Averaged Train Loss: 1.5823
-Averaged Test Accurancy: 0.5787
-Averaged Test AUC: 0.8357
-Std Test Accurancy: 0.3033
-Std Test AUC: 0.2076
-env output obs: torch.Size([20, 4]) rew 99998.41772914272
-Traceback (most recent call last):
-  File "/Users/alice/Desktop/python/FL_selection/system/main.py", line 530, in <module>
-    run(args)
-  File "/Users/alice/Desktop/python/FL_selection/system/main.py", line 300, in run
-    server.rl_train()
-  File "/Users/alice/Desktop/python/FL_selection/system/flcore/servers/server_voi.py", line 224, in rl_train
-    batch_obs = torch.tensor(batch_obs, dtype=torch.float)
-ValueError: only one element tensors can be converted to Python scalars
+Storage on cpu
+-------------------------------------------------------------------------------
+Total Tensors: 126853717 	Used Memory: 268.00M
+-------------------------------------------------------------------------------

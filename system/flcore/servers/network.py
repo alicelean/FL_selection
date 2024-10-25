@@ -18,9 +18,10 @@ class FeedForwardNN(nn.Module):
             obs = torch.tensor(obs, dtype=torch.float)
         if isinstance(obs, list):
             obs = torch.tensor(obs, dtype=torch.float)
-        print("obs is :obs",obs)
+        #print("obs is :obs",obs)
         # 展平输入矩阵
         obs = obs.view(-1, self.flatten_size)
+        obs = obs.float()
         #print(f"Input shape after flattening: {obs.shape}")
         x = torch.relu(self.fc1(obs))  # 第一个隐藏层 + ReLU
         x = torch.relu(self.fc2(x))  # 第二个隐藏层 + ReLU

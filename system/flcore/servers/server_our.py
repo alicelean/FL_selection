@@ -1,4 +1,4 @@
-import time,os,queue
+import time, os, queue
 from flcore.clients.client_voi import clientVOI
 from flcore.servers.serverbase import Server
 from threading import Thread
@@ -7,10 +7,11 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 from selection.PramidFy import *
 from utils.data_utils import read_client_data
-import random,copy
+import random, copy
 import gymnasium as gym
 import torch
 import sys
+
 sys.path.append('/Users/alice/Desktop/python/FL_selection/system/flcore/servers')
 from ppo import PPO
 from network import FeedForwardNN
@@ -23,22 +24,21 @@ class FedVOI(Server):
 
     def __init__(self, args, times):
         super().__init__(args, times)
-        self.method = "FedVOI"
-        self.omiga=10
-        self.selection = PramidFy(args,self.num_join_clients)
+        self.method = "FedAvg"
+        self.omiga = 10
+        self.selection = PramidFy(args, self.num_join_clients)
         self.queue = queue.Queue()
-        self.InfoQueue= queue.Queue()
-        #------------voi
-        #时间资源
-        self.total_time=10000
-        self.timeResoure=100
+        self.InfoQueue = queue.Queue()
+
+        # ------------voi
+        self.timeResoure = 1000
         self.StatesQueue = queue.Queue()
-        self.actionQueue= queue.Queue()
+        self.actionQueue = queue.Queue()
         self.hyperparameters = {
-            'timesteps_per_batch': 20,
-            'max_timesteps_per_episode': 5,
+            'timesteps_per_batch': 2,
+            'max_timesteps_per_episode': 1,
             'gamma': 0.99,
-            'n_updates_per_iteration': 10, #在每次采集到新数据后，进行多少次策略更新
+            'n_updates_per_iteration': 10,
             'lr': 3e-4,
             'clip': 0.2,
             'render': True,
@@ -50,7 +50,7 @@ class FedVOI(Server):
         self.env = FederatedLearningEnv(num_clients=args.num_clients, k=self.num_join_clients)
         self.actor_model = args.actor_model
         self.critic_model = args.critic_model
-        self.total_timesteps = 100
+        self.total_timesteps = 20000
         # 初始化PPO------------
         # self.StatesQueue,self.actionQueue
         self.ppomodel = PPO(policy_class=FeedForwardNN, env=self.env, **self.hyperparameters)
@@ -59,17 +59,12 @@ class FedVOI(Server):
             self.ppomodel.actor.load_state_dict(torch.load(self.actor_model))
             self.ppomodel.critic.load_state_dict(torch.load(self.critic_model))
 
-        #资源设计
-        self.computeResource()
-        self.communicateResource()
-
-
-#-------------------------------------------
+        # -------------------------------------------
         # select slow clients
         self.set_slow_clients()
         self.set_clients(clientVOI)
-        #在初始化客户端以后需要在注册器中注册每个客户端的信息
-        self.sampledClientSet=set()
+        # 在初始化客户端以后需要在注册器中注册每个客户端的信息
+        self.sampledClientSet = set()
         print(f"\nJoin ratio / total clients: {self.join_ratio} / {self.num_clients}")
         print("Finished creating server and clients.")
 
@@ -77,80 +72,56 @@ class FedVOI(Server):
         self.Budget = []
 
     def update_client_states(self):
-        self.client_states=[]
+        self.client_states = []
         for client in self.clients:
-            print("client id state  :",client.currentloss, client.size, client.stale, client.age)
+            print("client id state  :", client.currentloss, client.size, client.stale, client.age)
             client.states = [client.currentloss, client.size, client.stale, client.age]
             self.client_states.append(client.states)
 
-    def caculate_reward(self,train_loss):
-        self.popReward=self.omiga-train_loss
+    def caculate_reward(self, train_loss):
+        self.popReward = self.omiga - train_loss
 
     def get_selected_clients(self, action):
         if isinstance(action, np.ndarray):
             action = torch.from_numpy(action)  # 将 numpy.ndarray 转换为 PyTorch Tensor
-        #先归一化成概率再选最高的topk
+        # 先归一化成概率再选最高的topk
         Actionprobabilities = torch.softmax(action, dim=1)
         top_k_probs, top_k_indices = torch.topk(Actionprobabilities, self.env.select_num)
-        ids=top_k_indices.tolist()[0]
         for client in self.clients:
-            if client.id in ids:
+            if client.id in top_k_indices:
+                client.age = 0
                 self.selected_clients.append(client)
-        #print("top_k_indices is ",top_k_indices)
-        return ids
+            else:
+                client.age += 1
+        print("top_k_indices is ", top_k_indices)
+        return top_k_indices.tolist()
+
     def get_client_states(self):
-        clientStates=[]
+        clientStates = []
         for c in self.clients:
-            c.states=[c.currentloss,c.size,c.stale,c.age]
+            c.states = [c.currentloss, c.size, c.stale, c.age]
             clientStates.append(c.states)
         return torch.tensor(clientStates)
 
-    import numpy as np
-    def computeResource(self,mean_training_time=100,std_dev_training_time=50):
-        # 从正态分布中生成训练时间
-        training_times = np.random.normal(mean_training_time, std_dev_training_time, self.num_clients)
-        # 确保训练时间为正数，并裁剪到合理范围
-        training_times = np.clip(training_times, 1, None)
-
-        # 输出每个客户端的训练时间
-        timedict={}
-        for client_id, time in enumerate(training_times):
-            print(f"客户端 {client_id}: 训练时间 {time:.2f} 秒")
-            timedict[client_id]=time
-        for client in self.clients:
-            client.compute=timedict[client.id]
-
-    def communicateResource(self,mean_training_time=50,std_dev_training_time=100):
-        # 从正态分布中生成训练时间
-        training_times = np.random.normal(mean_training_time, std_dev_training_time, self.num_clients)
-        # 确保训练时间为正数，并裁剪到合理范围
-        training_times = np.clip(training_times, 1, None)
-        # 输出每个客户端的训练时间
-        timedict={}
-        for client_id, time in enumerate(training_times):
-            print(f"客户端 {client_id}: 通信时间 {time:.2f} 秒")
-            timedict[client_id]=time
-        for client in self.clients:
-            client.communicate=timedict[client.id]
-
-    def  rl_train(self):
-        #------------------------------
+    def rl_train(self):
+        # ------------------------------
         # 新增1————————————————————————————————————————————————————————————————————————————————
         colum_value = []
         select_id = []
+        if self.fix_ids:
+            self.read_fix_id()
         # ————————————————————————————————————————————————————————————————————————————————
-        round = 0
-        #actor,critic模型训练-------------
+
+        # actor,critic模型训练-------------
         print(f"Learning... Running {self.ppomodel.max_timesteps_per_episode} timesteps per episode, ", end='')
-        print(f"{self.ppomodel.timesteps_per_batch} timesteps per batch for a total of {self.total_timesteps} timesteps")
+        print(
+            f"{self.ppomodel.timesteps_per_batch} timesteps per batch for a total of {self.total_timesteps} timesteps")
         t_so_far = 0  # Timesteps simulated so far
         i_so_far = 0  # Iterations ran so far
-        #total_timesteps是总体训练时间
-        start_time = time.time()
-        while t_so_far < self.total_timesteps and round <self.global_rounds:  # ALG STEP 2
+        while t_so_far < self.total_timesteps:  # ALG STEP 2
             # Autobots, roll out (just kidding, we're collecting our batch simulations here)
             # 进行一次轨迹收集
-            #batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens = self.ppomodel.rollout()  # ALG STEP 3
+            # batch_obs, batch_acts, batch_log_probs, batch_rtgs, batch_lens = self.ppomodel.rollout()  # ALG STEP 3
             print("#" * 50, "rl  data start -------")
             batch_obs = []
             batch_acts = []
@@ -159,143 +130,128 @@ class FedVOI(Server):
             batch_rtgs = []
             batch_lens = []
             r_t = 0
-            costtime=0
-            truncated=False
-            terminated=False
-            start_timelist=[]
-            done=False
-            #多条轨迹采样后一次更新，
-            while r_t < self.ppomodel.timesteps_per_batch and round<self.global_rounds:
-                # ------------------------------------------------------
-
+            round = 0
+            costtime = 0
+            truncated = False
+            terminated = False
+            # 出事时计算每个客户端的loss
+            _ = self.evaluate(0)
+            while r_t < self.ppomodel.timesteps_per_batch:
+                start_time = time.time()
                 ep_rews = []  # rewards collected per episode,一条轨迹
+                obs = self.get_client_states()
+                # print("#" * 30, f" t is {r_t} ;obs is {obs}")
+                done = False
                 for ep_t in range(self.ppomodel.max_timesteps_per_episode):
-                    # 继续训练
-                    round += 1
-                    s_t=time.time()
-
-                    # server 初始发送全局模型----------
-                    print("~"*30,"global moedl send to all client")
-                    self.send_models(round)
-                    # -----------local training--------------------------
-                    print("~" * 30, "all client start local training")
-                    local_training_list = []
-                    threa = ThreadPoolExecutor(max_workers=self.num_clients)
-                    for client in self.clients:
-                        future = threa.submit(client.train, self.queue, round)  # 提交任务
-                        local_training_list.append(future)  # 将 Future 对象添加到列表
-                    # 关闭线程池
-                    threa.shutdown(wait=True)
-                    print("~" * 30, "all client end local training ")
-
-                    obs = self.get_client_states()
-
-                    print("#" * 30, f" round is {round} ;env state is {obs}")
                     r_t += 1  # Increment timesteps ran this batch so far
                     if isinstance(obs, list):
                         obs = torch.tensor(obs, dtype=torch.float)
                     batch_obs.append(obs)
+                    print("-" * 30,
+                          f"ep_t is {ep_t},t is {r_t},self.max_timesteps_per_episode is {self.ppomodel.max_timesteps_per_episode},self.timesteps_per_batch is {self.ppomodel.timesteps_per_batch}")
 
                     action, log_prob = self.ppomodel.get_action(obs, True)
 
-                    #----------------------fl training------------------------------
+                    # ----------------------fl training------------------------------
+                    round += 1
                     # 新增2————————————————————————————————————————————————————————————————————————————————
+
                     ids = self.get_selected_clients(action)
                     select_id.append([round, ids])
-                    #计算选中的客户端与总体的差距
-                    distance=self.get_select_distance()
-                    print("action:", action, "prob", log_prob, )
-                    print("send select message to client ,select client id  is :",ids)
-                    #需要将选中的信息发送给客户端-------
+                    print("Actor output action:", action, "log_prob", log_prob.shape, )
+                    print("select id is :", ids)
+                    # ————————————————————————————————————————————————————————————————————————————————
+                    # send global model to all clients
+                    self.send_models(ids)
+                    # selected clients local training
+                    local_training_list = []
+                    threa = ThreadPoolExecutor(max_workers=self.num_clients)
+                    j = 0
+                    # 提交所有客户端的训练任务
                     for client in self.clients:
-                        if client.id in ids:
-                            client.isSelected=True
-                            client.age = 0
-                        else:
-                            client.isSelected = False
-                            client.age +=1
+                        future = threa.submit(client.train, self.queue)  # 提交任务
+                        local_training_list.append(future)  # 将 Future 对象添加到列表
+                    # 使用 as_completed 来异步处理任务结果
+
+                    for future in as_completed(local_training_list):
+                        try:
+                            result = future.result()  # 获取任务结果，阻塞直到任务完成
+                            print(f"Task completed with result: {result}")
+                        except Exception as e:
+                            print(f"Task generated an exception: {e}")
+                    # 关闭线程池
+                    threa.shutdown(wait=True)
                     self.receive_models()
                     if self.dlg_eval and i % self.dlg_gap == 0:
                         self.call_dlg(i)
                     self.aggregate_parameters()
-                    print("~"*30,"global model aggragation and  send  to client ")
-
                     if round % self.eval_gap == 0:
-                        print("-"*50,f"------ep_t is {ep_t}, t is {r_t} -Round : {round}，Evaluate global mode-------------","-"*50)
+                        print("-" * 50, f"\n-----------rl--Round number: {round}-------------", "-" * 50)
+
                         # localResult=[self.method, group, train_loss, test_acc, test_auc, np.std(accs), np.std(aucs)]
-                        # # 更新需要计算本地的状态:loss
-                        # _ = self.evaluate(round)
+                        # 更新需要计算本地的状态:loss
+                        _ = self.evaluate(round)
                         # print("res is:",res)
                         # 新增3————————————————————————————————————————————————————————————————————————————————
                         # 记录当前模型的状态，loss,accuracy
+                        print("-" * 30, "\nEvaluate global model", "-" * 30)
                         res = self.evaluate_global(round, self.global_model)
-                        resc = self.addvalue(res)
-                        resc.append(distance)
-                        colum_value.append(resc)
                         print("-" * 30, "---------------------", "-" * 30)
+                        resc = self.addvalue(res)
+                        colum_value.append(resc)
                         # 根据损失计算一下回报
                         self.caculate_reward(res[2])
                         # ————————————————————————————————————————————————————————————————————————————————
-                        # # 更新强化学习环境状态
-                        # self.update_client_states()
-                    # for future in as_completed(local_training_list):
-                    #     try:
-                    #         result = future.result()  # 获取任务结果，阻塞直到任务完成
-                    #         print(f"Task completed with result: {result}")
-                    #     except Exception as e:
-                    #         print(f"Task generated an exception: {e}")
-                    # # 关闭线程池
-                    # threa.shutdown(wait=True)
+                        # 更新强化学习环境状态
+                        self.update_client_states()
+
                     # ----------------------------------------------------------------
-                    #obs=self.get_client_states()
-                    rew=self.popReward
-                    # obs, rew, terminated, truncated, _ = self.env.step(action)
-                    print("~"*30, " action reward is", rew, )
+                    obs = self.get_client_states()
+                    rew = self.popReward
                     costtime += time.time() - start_time
-                    if round >=self.global_rounds or self.total_time<costtime:
-                        print(f"self.total_time is {self.total_time},costtime is {costtime}")
-                        terminated=True
+                    if round >= self.global_rounds or self.timeResoure < costtime:
+                        terminated = True
+
+                    # obs, rew, terminated, truncated, _ = self.env.step(action)
+                    print("#fl  env output obs:", obs, "rew", rew, )
                     # 或运算
                     done = terminated | truncated
+
                     # Track recent reward, action, and action log probability
                     ep_rews.append(rew)
                     batch_acts.append(action)
                     # print("log_prob,batch_log_probs",log_prob.shape,len(batch_log_probs))
                     batch_log_probs.append(log_prob)
-                    self.Budget.append(time.time() - s_t)
 
-                    if done:
-                        print("round+self.ppomodel.max_timesteps_per_episode",
-                              round + self.ppomodel.max_timesteps_per_episode, self.global_rounds, done)
-
-                        break
                     # If the environment tells us the episode is terminated, break
+                    if done:
+                        break
                 print("one tragtory collected---------")
                 # Track episodic lengths and rewards
                 batch_lens.append(ep_t + 1)
                 batch_rews.append(ep_rews)
-                start_timelist.append(time.time()-start_time)
-
             # Reshape data as tensors in the shape specified in function description, before returning
-            #print("batch_obs is ,",batch_obs[0].shape)
-            print("batch_lens shape is :",batch_lens)
-
-            update_time = time.time()
+            print("batch_obs is ,", batch_obs[0].shape)
             batch_obs = torch.stack(batch_obs)
+            print("batch_acts shape is :", batch_acts[0])
             batch_acts = [torch.tensor(act) if isinstance(act, np.ndarray) else act for act in batch_acts]
             batch_acts = torch.stack(batch_acts)
+            # batch_obs = torch.tensor(batch_obs, dtype=torch.float)
+            # batch_acts = torch.tensor(batch_acts, dtype=torch.float)
+            # batch_log_probs = torch.tensor(batch_log_probs, dtype=torch.float)
             batch_log_probs = torch.stack(batch_log_probs, dim=0)  # 将多个张量沿新的维度堆叠
-            #print("batch_log_probs.shape,batch_acts.shape,batch_obs.shape is ,", batch_log_probs.shape,batch_acts.shape,batch_obs.shape)
+            print("batch_log_probs.shape,batch_acts.shape,batch_obs.shape is ,", batch_log_probs.shape,
+                  batch_acts.shape, batch_obs.shape)
             batch_rtgs = self.ppomodel.compute_rtgs(batch_rews)  # ALG STEP 4
             # Log the episodic returns and episodic lengths in this batch.
-            self.ppomodel.logger['batch_rews'] = batch_rews
-            self.ppomodel.logger['batch_lens'] = batch_lens
-            # Log the episodic returns and episodic lengths in this batch.
+
             # Calculate how many timesteps we collected this batch
             t_so_far += np.sum(batch_lens)
+
             # Increment the number of iterations
             i_so_far += 1
-            print("#" * 30, f"rl data collection success-t_so_far is {t_so_far},i_so_far is {i_so_far}-,update network-----")
+            print("#" * 30,
+                  f"rl data collection success-t_so_far is {t_so_far},i_so_far is {i_so_far}-,update network-----")
             # Logging timesteps so far and iterations so far
             self.ppomodel.logger['t_so_far'] = t_so_far
             self.ppomodel.logger['i_so_far'] = i_so_far
@@ -304,7 +260,6 @@ class FedVOI(Server):
             V, _ = self.ppomodel.evaluate(batch_obs, batch_acts)
             A_k = batch_rtgs - V.detach()
             A_k = (A_k - A_k.mean()) / (A_k.std() + 1e-10)
-            #在每次采集到新数据后，进行多少次策略更新
             for _ in range(self.ppomodel.n_updates_per_iteration):  # ALG STEP 6 & 7
                 # Calculate V_phi and pi_theta(a_t | s_t)
                 V, curr_log_probs = self.ppomodel.evaluate(batch_obs, batch_acts)
@@ -328,74 +283,83 @@ class FedVOI(Server):
 
                 # Log actor loss
                 self.ppomodel.logger['actor_losses'].append(actor_loss.detach())
-            update_time=time.time()-update_time
-            print("update onece time is :",update_time)
-
 
             # Print a summary of our training so far
             self.ppomodel._log_summary()
-
-
-        # 新增4————————————————————————————————————————————————————————————————————————————————
-        if round==self.global_rounds:
+            # 新增4————————————————————————————————————————————————————————————————————————————————
             self.write_info(select_id, colum_value)
-        # ————————————————————————————————————————————————————————————————————————————————
+            # ————————————————————————————————————————————————————————————————————————————————
 
-        print("rl,training is over!")
-        return colum_value,select_id,round
+            print("rl,training is over!")
 
     def train(self):
-       #新增1————————————————————————————————————————————————————————————————————————————————
-        colum_value,select_id,round=self.rl_train()
-       # ————————————————————————————————————————————————————————————————————————————————
-        for i in range(round+1,self.global_rounds+1):
+
+        # 新增1————————————————————————————————————————————————————————————————————————————————
+        colum_value = []
+        select_id = []
+        if self.fix_ids:
+            self.read_fix_id()
+        # ————————————————————————————————————————————————————————————————————————————————
+        for i in range(self.global_rounds + 1):
             s_t = time.time()
+
             # 新增2————————————————————————————————————————————————————————————————————————————————
-            #策略网络选择客户端
-            obs = self.get_client_states()
-            if isinstance(obs, list):
-                obs = torch.tensor(obs, dtype=torch.float)
-            action, log_prob = self.ppomodel.get_action(obs, True)
-            ids = self.get_selected_clients(action)
-            # 计算选中的客户端与总体的差距
-            distance = self.get_select_distance()
+
+            ids = self.get_selected_clients(i)
             select_id.append([i, ids])
             # ————————————————————————————————————————————————————————————————————————————————
-            self.send_models(i)
-         # ————————————————————————————————————————————————————————————————————————————————
-            #本地训练
-            local_training_list = []
-            threa = ThreadPoolExecutor(max_workers=self.num_clients)
+            self.send_models(ids, i)
+            # ————————————————————————————————————————————————————————————————————————————————
+
+            # 参与客户端训练本地数据（所有客户端参与训练）
+            # for client in self.clients:
+            #     client.selected = True
+            #     client.train(self.queue)
+            # client.localtrain()
+
+            tmp_r_list = []
+            t = ThreadPoolExecutor(max_workers=5)
+            j = 0
             for client in self.clients:
-                future = threa.submit(client.train, self.queue, round)  # 提交任务
-                local_training_list.append(future)  # 将 Future 对象添加到列表
-            # 关闭线程池
-            threa.shutdown(wait=True)
+                tmp_r_list.append(t.submit(client.train, self.queue))
+                tmp_r_list[j].result()
+                j += 1
 
+            self.sampledClientSet = self.selection.run(self.global_model, self.queue, self.stop_signal,
+                                                       self.clientSampler, self.sampledClientSet, i)
+            print("###" * 20, f"  round is {i}self.selection.run {self.sampledClientSet}")
             self.receive_models()
-
             if self.dlg_eval and i % self.dlg_gap == 0:
                 self.call_dlg(i)
-
             self.aggregate_parameters()
-            print("~" * 30, "global model aggragation and  send  to client ")
 
-            #--------------------------------------------------------------
+            # --------------------------------------------------------------
 
-            #评估全局模型，获得总体损失
-            if i%self.eval_gap == 0:
-                print(f"\n-------------Training  Round number: {i}-------------")
+            # 评估全局模型，获得总体损失
+            if i % self.eval_gap == 0:
+                print(f"\n-------------Round number: {i}-------------")
                 print("\nEvaluate global model")
+                # localResult=[self.method, group, train_loss, test_acc, test_auc, np.std(accs), np.std(aucs)]
+                # 更新需要计算本地的状态:loss
+                _ = self.evaluate(i)
+                # print("res is:",res)
+                # 新增3————————————————————————————————————————————————————————————————————————————————
                 # 记录当前模型的状态，loss,accuracy
                 res = self.evaluate_global(i, self.global_model)
-                resc=self.addvalue(res)
-                resc.append(distance)
+                resc = self.addvalue(res)
                 colum_value.append(resc)
                 print("res is:", resc)
-            #----------------------------------------------------------------
+                # 根据损失计算一下回报
+                self.caculate_reward(res[2])
+                # ————————————————————————————————————————————————————————————————————————————————
+                # 更新强化学习环境状态
+                self.update_client_states()
+
+            # ----------------------------------------------------------------
             self.Budget.append(time.time() - s_t)
-            print('-'*25,"Round is ",i,'-'*25, 'time cost', '-'*25, self.Budget[-1])
-            print('-'*25,"Budget is :",self.Budget)
+            print('-' * 25, "Round is ", i, '-' * 25, 'time cost', '-' * 25, self.Budget[-1])
+            print('-' * 25, "Budget is :", self.Budget)
+
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                 break
 
@@ -404,13 +368,51 @@ class FedVOI(Server):
         #     self.rs_train_acc), min(self.rs_train_loss))
         print(max(self.rs_test_acc))
         print("\nAverage time cost per round.")
-        print(sum(self.Budget[1:])/len(self.Budget[1:]))
-       # 新增4————————————————————————————————————————————————————————————————————————————————
-        self.write_info(select_id,colum_value)
-       # ————————————————————————————————————————————————————————————————————————————————
+        print(sum(self.Budget[1:]) / len(self.Budget[1:]))
+
+        # # --------------7.训练过程中error
+        # print("error",self.aggreErr)
+        # redf = pd.DataFrame(columns=["group", "error", "var"])
+        # redf.loc[len(redf) + 1] = ["group", "error", "var"]
+        # for i in range(len(self.aggreErr)):
+        #     redf.loc[len(redf) + 1] = self.aggreErr[i]
+        # errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_errorg11.csv"
+        # redf.to_csv(errorpath, mode='a', header=False)
+        # print("success training write acc txt", errorpath)
+        # # 记录一下每个客户端的变化情况
+        # redf = pd.DataFrame(columns=["clientid", "distance","error"])
+        # redf.loc[len(redf) + 1] = ["clientid", "distance", "error"]
+        # for client in self.clients:
+        #     redf.loc[len(redf) + 1] = [client.id,client.distance, client.error]
+        # errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_clients_errorg11.csv"
+        # redf.to_csv(errorpath, mode='a', header=False)
+        # print("success training write acc txt", errorpath)
+        # 新增4————————————————————————————————————————————————————————————————————————————————
+        self.write_info(select_id, colum_value)
+        # ————————————————————————————————————————————————————————————————————————————————
+
+        # 绘制混淆矩阵热力图---------------
+        # self.plot_CM()
+        # -----------------------------------------------------------------------------------------------
+        # #写入训练时间---------------------------------------------------------------------------
+        # redf = pd.DataFrame(
+        #     columns=["dataset", "method", "round", "ratio", "average_time_per", "total_time", "time_list"])
+        # redf.loc[len(redf) + 1] = ["dataset", "method", "round", "ratio", "average_time_per", "total_time", "time_list"]
+        # redf.loc[len(redf) + 1] = [self.dataset, self.method, self.global_rounds, self.join_ratio,
+        #                            sum(self.Budget[1:]) / len(self.Budget[1:]), sum(self.Budget[1:]), self.Budget[1:]]
+        # accpath = self.programpath + "/res/time_cost_" + self.dataset + str(self.alpha) + "_time.csv"
+        # print("success training write acc txt", accpath)
+        # redf.to_csv(accpath, mode='a', header=False)
+
         self.save_results()
+        # self.save_global_model()
 
-
+        # if self.num_new_clients > 0:
+        #     self.eval_new_clients = True
+        #     self.set_new_clients(clientAVG)
+        #     print(f"\n-------------Fine tuning round-------------")
+        #     print("\nEvaluate new clients")
+        #     self.evaluate()
 
     def set_clients(self, clientObj):
         print("**************************1.INfo,set_clients ,init data********************")
@@ -433,20 +435,19 @@ class FedVOI(Server):
                                send_slow=send_slow)
             self.clients.append(client)
             #   每个客户端和总体的距离，这里定义为客户端的数据量
-            distanceVec = [len(train_data)+len(test_data)]
-            sizeVec = [len(train_data)+len(test_data)]
-            tmp_dict[i]=[]
+            distanceVec = [len(train_data) + len(test_data)]
+            sizeVec = [len(train_data) + len(test_data)]
+            tmp_dict[i] = []
             tmp_dict[i].append(distanceVec)
             tmp_dict[i].append(sizeVec)
             self.InfoQueue.put(tmp_dict)
-            #self.selection.InfoQueue.put(tmp_dict)
+            # self.selection.InfoQueue.put(tmp_dict)
 
         for client in self.clients:
-            label = client.setlabel()
-            for j in range(len(label)):
-                self.alllabel[j] += label[j]
+            client.setlabel()
             client.size = client.train_samples + client.test_samples
-            client.sizerate = (client.size*1.0) / samples
+
+            client.sizerate = (client.size * 1.0) / samples
 
         # 根据label 来计算distance
         self.setdistance()
@@ -492,28 +493,35 @@ class FedVOI(Server):
                 tot_samples += client.train_samples
                 self.uploaded_ids.append(client.id)
                 self.uploaded_weights.append(client.train_samples)
-                #从客户端缓存中取模型
-                self.uploaded_models.append(copy.deepcopy(client.localmodel))
+                self.uploaded_models.append(client.model)
         for i, w in enumerate(self.uploaded_weights):
             self.uploaded_weights[i] = w / tot_samples
-    def send_models(self,round):
+
+    def send_models(self, selectids):
         '''
         将globalmodel复制给本地模型,并记录time cost
         Returns:
 
         '''
         assert (len(self.clients) > 0)
-        for client in self.clients:
-            #self.model
-            client.set_parameters(self.global_model)
-            #global缓存
-            client.set_parameters_global(self.global_model, round)
-            client.send_time_cost['num_rounds'] += 1
-            client.send_time_cost['total_cost'] +=client.communicate
 
+        # add更新模型参数，将globalmodel复制给本地模型----------------------
+        # for client in self.selected_clients:
+        #     if self.ISAAW:
+        #         client.local_initialization(self.global_model, round)
+        # #------------------------------------
+
+        for client in self.clients:
+            start_time = time.time()
+            client.set_parameters(self.global_model)
+            client.send_time_cost['num_rounds'] += 1
+            client.send_time_cost['total_cost'] += client.com
+            # 选中的客户端要更新他们的全局客户端的
+            if client.id in selectids:
+                client.set_parameters_global(self.global_model, round)
 
     def evaluate(self, group, acc=None, loss=None):
-        #利用本地模型进行评估
+        # 利用本地模型进行评估
         stats = self.test_metrics()
         stats_train = self.train_metrics()
         try:

@@ -23,7 +23,8 @@ class Client(object):
         self.id = id  # integer
         self.save_folder_name = args.save_folder_name
         #-----rl
-
+        # 是否被选中
+        self.isSelected = False
         #客户端模型的年龄，服务器多长时间没有收到客户端的本地模型信息，选中则 self.age=0，没选中则 self.age+=1
         self.age=0
         #客户端的数据量大小
@@ -31,16 +32,22 @@ class Client(object):
         #客户端当前的损失值（当前时刻本地模型的客户端损失，这个取决于本地模型的当前状态）
         self.currentloss=0
         self.avgloss=0
+        #计算资源
+        self.compute =0
+        #通信资源
+        self.communicate = 0
+
 
         self.current_round = 0
         # 发送模型后获得最新的全局模型，此时更改
         self.globalModel_round = 0  # 上一次参与全局模型训练
-        self.globalModel=copy.deepcopy(args.model)
-        self.localmodel = copy.deepcopy(args.model)
+        self.globalModel=copy.deepcopy(args.model)#big
+        self.localmodel = copy.deepcopy(args.model)#bil
         #本地训练中，全局模型的陈旧度，比如全局模型为t1时刻，当前时刻时t2时刻，那么结果就是t2-t1
         self.stale=0
         # 客户端的状态
         self.states = [self.currentloss,self.size,self.stale,self.age]
+        self.td=0#接收全局模型的时间
 
 
 
@@ -106,6 +113,7 @@ class Client(object):
         self.dp_sigma = args.dp_sigma
 
         self.loss = nn.CrossEntropyLoss()
+
         self.globallosess= nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
         self.learning_rate_scheduler = torch.optim.lr_scheduler.ExponentialLR(
@@ -133,7 +141,7 @@ class Client(object):
             batch_size = self.batch_size
         test_data = read_client_data(self.dataset, self.id, is_train=False)
         return DataLoader(test_data, batch_size, drop_last=False, shuffle=False)
-    def set_parameters_global(self, model,round):
+    def set_parameters_global(self, model,round=None):
         '''
         将model 复制给本地模型
         Args:
@@ -271,7 +279,6 @@ class Client(object):
 
 
 
-
     def train_metrics_last(self):
         trainloader = self.load_train_data()
         # self.model = self.load_model('model')
@@ -347,6 +354,7 @@ class Client(object):
             total_num+=1
 
         print(f"client base client  {self.id}, total_num is {total_num},label is {self.label}")
+        return self.label
 
 
     def local_initialization(self, received_global_model, round):

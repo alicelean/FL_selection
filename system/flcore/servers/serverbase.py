@@ -56,6 +56,9 @@ class Server(object):
         self.total_time=36000
         self.alpha=Aphla
 
+        #----self.alllabel = [0 for i in range(self.labellenght)]
+        self.alllabel = [0 for i in range(self.labellenght)]
+
 
 
 
@@ -154,12 +157,16 @@ class Server(object):
     def select_clients(self,round=-1):
         selected_clients=[]
         if round==-1:
+            #说明不是固定的客户端选择
             if self.random_join_ratio:
+                #计算客户端选择数量
                 self.current_num_join_clients = np.random.choice(range(self.num_join_clients, self.num_clients + 1), 1, replace=False)[0]
             else:
                 self.current_num_join_clients = self.num_join_clients
+
+
             if self.select_mode == 'pyramidFy':
-                pass
+                #判定采集的客户端元组中数量
                 if len(self.sampledClientSet)>self.current_num_join_clients:
                     selected_ids = list(np.random.choice(list(self.sampledClientSet), self.current_num_join_clients, replace=False))
                     print(" pyramidFy selected_ids select set",selected_ids,self.sampledClientSet,self.current_num_join_clients)
@@ -169,14 +176,10 @@ class Server(object):
                 for client in self.clients:
                     if client.id in selected_ids:
                         selected_clients.append(client)
-                for i in selected_clients:
-                    print("select client i ",i,type(i))
 
             if self.select_mode == 'random':
                 selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
-                #flcore.clients.clientavg.clientAVG
-                # for i in selected_clients:
-                #     print("select client i ",i,type(i))
+
 
             return selected_clients
 
@@ -846,6 +849,7 @@ class Server(object):
         for c in self.clients:
             clientinfo.append([c.id, c.train_samples, c.test_samples,c.sizerate, c.train_slow, c.send_slow,c.label])
         redf = pd.DataFrame(columns=dataname)
+        redf.loc[len(redf) + 1]=dataname
         for value in clientinfo:
             redf.loc[len(redf) + 1] = value
         redf.to_csv(path, mode='a', header=False)
@@ -870,14 +874,38 @@ class Server(object):
             self.clients.append(client)
 
         for client in self.clients:
-            client.setlabel()
+            label=client.setlabel()
+            for j in range(len(label)):
+               self.alllabel[j] +=label[j]
             client.size=client.train_samples + client.test_samples
             client.sizerate = (client.size*1.0) / samples
+
+
+
+
+
+
         # 根据label 来计算distance
         self.setdistance()
 
         # print(f"client {client.id} ,sizerate is {client.sizerate}")
         self.writeclientInfo()
+
+    def get_select_distance(self):
+        lag=True
+        select_label =None
+        for client in self.select_clients():
+            if lag:
+                select_label= [i for i in client.label]
+            else:
+                for j in range(len(client.label)):
+                    select_label[j]+=client.label[j]
+
+        return self.calculate_hellinger_distance(select_label, self.alllabel)
+
+
+
+
 
     def select_weight_vector(self):
         active_distance = 0
@@ -1062,6 +1090,7 @@ class Server(object):
             resc.append(line)
         return resc
     def write_selectids(self,select_id):
+        print("select_id value is,",select_id)
         #写入选择的客户端信息
         if not self.fix_ids:
             folder_path=self.programpath + "/res/selectids/"
@@ -1077,26 +1106,25 @@ class Server(object):
             redf.to_csv(idpath, mode='a', header=False)
             print("write select id list ", idpath)
     def write_acc(self,colum_value):
-        print("colum_value is ",colum_value)
-
-        #写入评估指标
+        # 写入评估指标
         folder_path = self.programpath + "/res/" + self.method + "/"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
         accpath = folder_path + self.dataset + "_acc.csv"
         allpath = self.programpath + "/res/ " + self.dataset + "_allacc_" + str(self.join_ratio) + "_" + str(
             self.num_clients) + "_" + str(self.alpha) + ".csv"
 
-        colum_name = ["case", "method", "group", "Loss", "Accurancy", "AUC", "Std Test Accurancy", "Std Test AUC","select_mode"]
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        colum_name = ["case", "method", "group", "Loss", "Accurancy", "AUC", "Std Test Accurancy", "Std Test AUC","select_mode","distance"]
         redf = pd.DataFrame(columns=colum_name)
         redf.loc[len(redf) + 1] = colum_name
         for i in range(len(colum_value)):
             colum_value[i].append(self.select_mode)
+            print("colum_value",len(colum_value[i]))
             redf.loc[len(redf) + 1] = colum_value[i]
         redf.to_csv(accpath, mode='a', header=False)
         redf.to_csv(allpath, mode='a', header=False)
         print("success training write acc txt", accpath,allpath)
-        print(colum_value)
+
     def wirte_time(self):
         #记录一下时间资源消耗
         timepath = self.programpath + "/res/timeCost_" + self.dataset + str(self.alpha) + ".csv"

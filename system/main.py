@@ -9,7 +9,7 @@ import numpy as np
 import torchvision
 import logging
 from flcore.servers.server_voi import FedVOI
-
+from flcore.servers.server_pyramid import FedPyramid
 from flcore.servers.serveravg import FedAvg
 from flcore.servers.serverpFedMe import pFedMe
 from flcore.servers.serverperavg import PerAvg
@@ -176,6 +176,8 @@ def run(args):
             server = FedAvg(args, i)
         elif args.algorithm == "FedVOI":
             server = FedVOI(args, i)
+        elif args.algorithm == "FedPyramid":
+            server = FedPyramid(args, i)
 
         elif args.algorithm == "Local":
             server = Local(args, i)
@@ -296,21 +298,15 @@ def run(args):
             raise NotImplementedError
 
         #模型训练
-        #server.train()
-        server.rl_train()
-
-
-
-
-
-
-
+        server.train()
+        #server.rl_train()
         time_list.append(time.time()-start)
 
     print(f"\nAverage time cost: {round(np.average(time_list), 2)}s.")
     
 
     # Global average
+    #与train 一起
     average_data(dataset=args.dataset, algorithm=args.algorithm, goal=args.goal, times=args.times)
 
     print("All done!")

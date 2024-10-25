@@ -1,50 +1,24 @@
-import time,os,queue
+import time,os
 from flcore.clients.clientavg import clientAVG
 from flcore.servers.serverbase import Server
 from threading import Thread
 import pandas as pd
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor
-from selection.PramidFy import *
-from utils.data_utils import read_client_data
-import random,copy
 
 class FedAvg(Server):
     def __init__(self, args, times):
         super().__init__(args, times)
         self.method = "FedAvg"
 
-        self.selection = PramidFy(args,self.num_join_clients)
-        self.queue = queue.Queue()
-        self.InfoQueue= queue.Queue()
-        self.stop_signal=queue.Queue()
-
-
-
         # select slow clients
         self.set_slow_clients()
         self.set_clients(clientAVG)
-        #在初始化客户端以后需要在注册器中注册每个客户端的信息
-        self.sampledClientSet=set()
-        self.clientSampler = self.selection.initiate_sampler_query(self.InfoQueue, args.num_clients)
-        for nextClientIdToRun in range(args.num_clients):
-            self.clientSampler.clientOnHost([nextClientIdToRun], nextClientIdToRun)
-            self.sampledClientSet.add(nextClientIdToRun)
-            self.clientSampler.clientLocalEpochOnHost([1], nextClientIdToRun)
-            self.clientSampler.clientDropoutratioOnHost([0], nextClientIdToRun)
-
-        print("after initiate_sampler_query self.queue",self.queue.qsize(),self.clientSampler.clientOnHosts)
-
-
-
-
 
         print(f"\nJoin ratio / total clients: {self.join_ratio} / {self.num_clients}")
         print("Finished creating server and clients.")
 
         # self.load_model()
         self.Budget = []
-
 
 
     def train(self):
@@ -57,71 +31,33 @@ class FedAvg(Server):
 
         for i in range(self.global_rounds+1):
             s_t = time.time()
-            #训练之前先计算客户端的状态
+            # 新增2————————————————————————————————————————————————————————————————————————————————
+            ids=self.get_selected_clients(i)
+            select_id.append([i, ids])
+            # 计算选中的客户端与总体的差距
+            distance = self.get_select_distance()
+            # ————————————————————————————————————————————————————————————————————————————————
+
+
+            self.send_models()
+
             if i%self.eval_gap == 0:
                 print(f"\n-------------Round number: {i}-------------")
                 print("\nEvaluate global model")
                 #self.evaluate()
-                #localResult=[self.method, group, train_loss, test_acc, test_auc, np.std(accs), np.std(aucs)]
-                localResult = self.evaluate(i)
-                res = self.evaluate_global(i,self.global_model)
-                print("res is:",res)
-                #print("resg is:", res1)
+                res = self.evaluate(i)
                 # 新增3————————————————————————————————————————————————————————————————————————————————
                 # 记录当前模型的状态，loss,accuracy
                 resc=self.addvalue(res)
+                resc.append(distance)
                 colum_value.append(resc)
-                #print("colum_value is",colum_value,resc is {resc})
                 # ————————————————————————————————————————————————————————————————————————————————
-            # 新增2————————————————————————————————————————————————————————————————————————————————
-
-            ids=self.get_selected_clients(i)
-            select_id.append([i, ids])
-            # ————————————————————————————————————————————————————————————————————————————————
-
-
-            self.send_models(ids,i)
-
-            # if i%self.eval_gap == 0:
-            #     print(f"\n-------------Round number: {i}-------------")
-            #     print("\nEvaluate global model")
-            #     #self.evaluate()
-            #     #res = self.evaluate(i)
-            #     res = self.evaluate_global(i,self.global_model)
-            #     print("res is:",res)
-            #     #print("resg is:", res1)
-            #     # 新增3————————————————————————————————————————————————————————————————————————————————
-            #     # 记录当前模型的状态，loss,accuracy
-            #     resc=self.addvalue(res)
-            #     colum_value.append(resc)
-            #     #print("colum_value is",colum_value,resc is {resc})
-            #     # ————————————————————————————————————————————————————————————————————————————————
 
             # 参与客户端训练本地数据（所有客户端参与训练）
-            # for client in self.clients:
-            #     client.selected = True
-            #     client.train(self.queue)
-                #client.localtrain()
-
-            tmp_r_list = []
-            t = ThreadPoolExecutor(max_workers=5)
-            j=0
             for client in self.clients:
-                if client.id in ids:
-                #print(f"client is {client.id,i},client training start")
-                    tmp_r_list.append(t.submit(client.train, self.queue))
-                    tmp_r_list[j].result()
-                    j+=1
-
-
-
-            self.sampledClientSet=self.selection.run(self.global_model, self.queue, self.stop_signal, self.clientSampler,self.sampledClientSet,i)
-            print("###"*20,f"  round is {i}self.selection.run {self.sampledClientSet}")
-            # threads = [Thread(target=client.train(queue))
-            #            for client in self.selected_clients]
-            # [t.start() for t in threads]
-            # [t.join() for t in threads]
-
+                client.selected = True
+                client.train()
+                #client.localtrain()
             #------
             # aggreError = []
             # for client in self.clients:
@@ -165,7 +101,10 @@ class FedAvg(Server):
 
 
 
-
+            # threads = [Thread(target=client.train)
+                #            for client in self.selected_clients]
+                # [t.start() for t in threads]
+                # [t.join() for t in threads]
 
             self.receive_models()
             if self.dlg_eval and i%self.dlg_gap == 0:
@@ -173,13 +112,13 @@ class FedAvg(Server):
             self.aggregate_parameters()
 
             # -------------------------------------
-            # aggreError = []
-            # for client in self.selected_clients:
-            #     client.calculate_gobal_loss(self.global_model)
-            #     client.calculate_local_loss()
-            #     aggreError.append(client.globalloss[-1] )
-            #     client.error.append(client.localloss[-1])
-            # self.aggreErr.append([i, np.mean(aggreError), np.var(aggreError)])
+            aggreError = []
+            for client in self.selected_clients:
+                client.calculate_gobal_loss(self.global_model)
+                client.calculate_local_loss()
+                aggreError.append(client.globalloss[-1] )
+                client.error.append(client.localloss[-1])
+            self.aggreErr.append([i, np.mean(aggreError), np.var(aggreError)])
             # --------------------------------------------
 
             self.Budget.append(time.time() - s_t)
@@ -197,23 +136,23 @@ class FedAvg(Server):
         print(sum(self.Budget[1:])/len(self.Budget[1:]))
 
 
-        # # --------------7.训练过程中error
-        # print("error",self.aggreErr)
-        # redf = pd.DataFrame(columns=["group", "error", "var"])
-        # redf.loc[len(redf) + 1] = ["group", "error", "var"]
-        # for i in range(len(self.aggreErr)):
-        #     redf.loc[len(redf) + 1] = self.aggreErr[i]
-        # errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_errorg11.csv"
-        # redf.to_csv(errorpath, mode='a', header=False)
-        # print("success training write acc txt", errorpath)
-        # # 记录一下每个客户端的变化情况
-        # redf = pd.DataFrame(columns=["clientid", "distance","error"])
-        # redf.loc[len(redf) + 1] = ["clientid", "distance", "error"]
-        # for client in self.clients:
-        #     redf.loc[len(redf) + 1] = [client.id,client.distance, client.error]
-        # errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_clients_errorg11.csv"
-        # redf.to_csv(errorpath, mode='a', header=False)
-        # print("success training write acc txt", errorpath)
+        # --------------7.训练过程中error
+        print("error",self.aggreErr)
+        redf = pd.DataFrame(columns=["group", "error", "var"])
+        redf.loc[len(redf) + 1] = ["group", "error", "var"]
+        for i in range(len(self.aggreErr)):
+            redf.loc[len(redf) + 1] = self.aggreErr[i]
+        errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_errorg11.csv"
+        redf.to_csv(errorpath, mode='a', header=False)
+        print("success training write acc txt", errorpath)
+        # 记录一下每个客户端的变化情况
+        redf = pd.DataFrame(columns=["clientid", "distance","error"])
+        redf.loc[len(redf) + 1] = ["clientid", "distance", "error"]
+        for client in self.clients:
+            redf.loc[len(redf) + 1] = [client.id,client.distance, client.error]
+        errorpath = self.programpath + "/res/" + self.method + "/" + self.dataset + "_clients_errorg11.csv"
+        redf.to_csv(errorpath, mode='a', header=False)
+        print("success training write acc txt", errorpath)
        # 新增4————————————————————————————————————————————————————————————————————————————————
         self.write_info(select_id,colum_value)
        # ————————————————————————————————————————————————————————————————————————————————
@@ -245,113 +184,3 @@ class FedAvg(Server):
             print(f"\n-------------Fine tuning round-------------")
             print("\nEvaluate new clients")
             self.evaluate()
-
-
-    def set_clients(self, clientObj):
-        print("**************************1.INfo,set_clients ,init data********************")
-        samples = 0
-        print("train_slow,send_slow", self.num_clients, self.train_slow_clients, self.send_slow_clients)
-
-        # 读取所有的训练数据和测试数据
-        for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
-            tmp_dict = {}
-            train_data = read_client_data(self.dataset, i, is_train=True)
-            test_data = read_client_data(self.dataset, i, is_train=False)
-            samples += len(train_data) + len(test_data)
-            client = clientObj(self.args,
-                               id=i,
-                               traindata=train_data,
-                               testsdata=test_data,
-                               train_samples=len(train_data),
-                               test_samples=len(test_data),
-                               train_slow=train_slow,
-                               send_slow=send_slow)
-            self.clients.append(client)
-            #   每个客户端和总体的距离，这里定义为客户端的数据量
-            distanceVec = [len(train_data)+len(test_data)]
-            sizeVec = [len(train_data)+len(test_data)]
-            tmp_dict[i]=[]
-            tmp_dict[i].append(distanceVec)
-            tmp_dict[i].append(sizeVec)
-            self.InfoQueue.put(tmp_dict)
-            #self.selection.InfoQueue.put(tmp_dict)
-
-        for client in self.clients:
-            client.setlabel()
-            client.sizerate = (client.train_samples + client.test_samples) / samples
-        # 根据label 来计算distance
-        self.setdistance()
-
-        # print(f"client {client.id} ,sizerate is {client.sizerate}")
-        self.writeclientInfo()
-
-    def aggregate_parameters(self):
-        assert (len(self.uploaded_models) > 0)
-
-        self.global_model = copy.deepcopy(self.uploaded_models[0])
-        for param in self.global_model.parameters():
-            param.data.zero_()
-
-        for w, client_model in zip(self.uploaded_weights, self.uploaded_models):
-            self.add_parameters(w, client_model)
-
-    def receive_models(self):
-        '''
-        根据设定的客户端丢失率、时间阈值和客户端的训练时间消耗，
-        选择符合条件的活跃客户端，并收集其模型和样本权重。最后，对样本权重进行归一化，以便后续在联邦学习中使用。
-        Returns:
-
-        '''
-        assert (len(self.selected_clients) > 0)
-
-        active_clients = random.sample(
-            self.selected_clients, int((1 - self.client_drop_rate) * self.num_join_clients))
-
-        active_clients = self.selected_clients
-
-        self.uploaded_ids = []
-        self.uploaded_weights = []
-        self.uploaded_models = []
-        tot_samples = 0
-        for client in active_clients:
-            try:
-                client_time_cost = client.train_time_cost['total_cost'] / client.train_time_cost['num_rounds'] + \
-                                   client.send_time_cost['total_cost'] / client.send_time_cost['num_rounds']
-            except ZeroDivisionError:
-                client_time_cost = 0
-            if client_time_cost <= self.time_threthold:
-                tot_samples += client.train_samples
-                self.uploaded_ids.append(client.id)
-                self.uploaded_weights.append(client.train_samples)
-                self.uploaded_models.append(client.model)
-        for i, w in enumerate(self.uploaded_weights):
-            self.uploaded_weights[i] = w / tot_samples
-    def send_models(self,selectids):
-        '''
-        将globalmodel复制给本地模型,并记录time cost
-        Returns:
-
-        '''
-        assert (len(self.clients) > 0)
-
-        # add更新模型参数，将globalmodel复制给本地模型----------------------
-        # for client in self.selected_clients:
-        #     if self.ISAAW:
-        #         client.local_initialization(self.global_model, round)
-        # #------------------------------------
-
-        for client in self.clients:
-            start_time = time.time()
-            client.set_parameters(self.global_model)
-            client.send_time_cost['num_rounds'] += 1
-            client.send_time_cost['total_cost'] += 2 * (time.time() - start_time)
-            #选中的客户端要更新他们的全局客户端的
-            if client.id in selectids:
-                set_parameters_global(self, model, round)
-
-
-
-
-
-
-

@@ -8,7 +8,7 @@ from sklearn.preprocessing import label_binarize
 from sklearn import metrics
 
 
-class clientVOI(Client):
+class clientPyramid(Client):
     def __init__(self, args, id, traindata, testsdata, train_samples, test_samples, **kwargs):
         super().__init__(args, id, traindata, testsdata, train_samples, test_samples, **kwargs)
         self.loss_decay = args.loss_decay
@@ -16,9 +16,7 @@ class clientVOI(Client):
         self.enable_dropout = args.enable_dropout
         self.nextClientDropoutRatio = None
 
-    def train(self, queue,round):
-        #if client.id ==0:
-        #print(f"client {self.id} start train round is {round}-------------------- ")
+    def train(self, queue):
         # 1.--------- score = -1
         score = -1
         LocalDropoutRatio = 0 if self.nextClientDropoutRatio == None or not self.enable_dropout else \
@@ -88,19 +86,6 @@ class clientVOI(Client):
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-            #缓存每次训练后的模型
-            for new_param, old_param in zip(self.model.parameters(), self.localmodel.parameters()):
-                old_param.data = new_param.data.clone()
-            #计算本地模型的损失
-            losses, train_num=self.train_metricsWithmodel()
-            self.currentloss = (losses * 1.0)
-            self.avgloss = (losses * 1.0) / train_num
-            #print(f"update client is{self.id},self.currentloss is {self.currentloss}")
-            #计算资源差异
-            time.sleep(self.compute)
-
-
-            #self.localmodel.load_state_dict(self.model.state_dict())
 
         # self.model.cpu()
         #
@@ -179,34 +164,6 @@ class clientVOI(Client):
         if self.privacy:
             eps, DELTA = get_dp_params(privacy_engine)
             print(f"Client {self.id}", f"epsilon = {eps:.2f}, sigma = {DELTA}")
-
-    def train_metricsWithmodel(self):
-        trainloader = self.load_train_data()
-        # self.model = self.load_model('model')
-        # self.model.to(self.device)
-        self.localmodel.eval()
-        closs = nn.CrossEntropyLoss()
-        train_num = 0
-        losses = 0
-        with torch.no_grad():
-            for x, y in trainloader:
-                if type(x) == type([]):
-                    x[0] = x[0].to(self.device)
-                else:
-                    x = x.to(self.device)
-                y = y.to(self.device)
-                output = self.localmodel(x)
-                #print("model print",output ,y)
-                #print("test:",loss.shape)
-                loss = closs(output, y)
-                loss=loss.mean()
-                train_num += y.shape[0]
-                losses += loss.item() * y.shape[0]
-
-        return losses, train_num
-
-
-
 
     def test_metrics_global(self, model):
         testloaderfull = self.load_test_data()

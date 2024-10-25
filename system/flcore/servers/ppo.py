@@ -301,7 +301,7 @@ class PPO:
 			action = dist.sample()
 			# Calculate the log probability for that action
 			log_prob = dist.log_prob(action)
-			print("多维正太分布的动作 log_prob:", log_prob, action)
+			#print("多维正太分布的动作 log_prob:", log_prob, action)
 			return action.detach().numpy(), log_prob.detach()
 		else:
 			Actionprobabilities = torch.softmax(mean, dim=1)
@@ -328,15 +328,15 @@ class PPO:
 		# Query critic network for a value V for each batch_obs. Shape of V should be same as batch_rtgs
 		#用于评估给定观测值（batch_obs）的状态价值，并计算在这些观测下采取的动作（batch_acts）的对数概率
 		V = self.critic(batch_obs).squeeze()
-		print("V,batch_obs",V.shape,batch_obs.shape)
+		#print("V,batch_obs",V.shape,batch_obs.shape)
 		#print("V is ",V)
 
 		# Calculate the log probabilities of batch actions using most recent actor network.
 		# This segment of code is similar to that in get_action()
-		mean = self.actor(batch_obs)
-		print("mean is ", mean.shape,"batch_acts is ", batch_acts.shape)
+		action_mean = self.actor(batch_obs)
+		#print("mean is ", mean.shape,"batch_acts is ", batch_acts.shape)
 
-		dist = MultivariateNormal(mean, self.cov_mat)
+		dist = MultivariateNormal(action_mean, self.cov_mat)
 		log_probs = dist.log_prob(batch_acts)
 
 		# Return the value vector V of each observation in the batch
