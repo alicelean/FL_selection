@@ -2,8 +2,8 @@ import torch
 import torch
 import torch.nn as nn
 
-from autos.decoder import construct_decoder
-from autos.encoder import construct_encoder
+from selection.fedGCS.autos.decoder import construct_decoder
+from selection.fedGCS.autos.encoder import construct_encoder
 SOS_ID = 0
 EOS_ID = 0
 

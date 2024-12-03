@@ -17,12 +17,10 @@ import torch.utils
 from torch import Tensor
 from torch.utils.data import DataLoader
 
-from autos.model import AUTOS
-from device_env import Evaluator, base_path
-from autos.train_utils import AvgrageMeter, pairwise_accuracy, hamming_distance, FSDataset
-from record import SelectionRecord
-from utils.logger import info, error
-from plato.config import Config
+from selection.fedGCS.autos.model import AUTOS
+from selection.fedGCS.device_env import Evaluator, base_path
+from selection.fedGCS.autos.train_utils import AvgrageMeter, pairwise_accuracy, hamming_distance, FSDataset
+from selection.fedGCS.record import SelectionRecord
 from torchstat import stat
 
 # parser = argparse.ArgumentParser()
