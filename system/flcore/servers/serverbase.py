@@ -48,7 +48,7 @@ class Server(object):
         self.fix_ids = False
 
         self.ISAAW=False
-        self.programpath=Programpath
+        self.programpath=os.getcwd()
         self.device = args.device
         if args.dataset == 'agnews':
             self.labellenght =4
@@ -153,6 +153,7 @@ class Server(object):
         # 新增：统计每一轮训练的资源消耗------
         highClientNum = 0
         round_time = []
+        print("selectids",selectids)
         for client in self.clients:
             if client.id in selectids:
                 client.select_time += 1
@@ -972,7 +973,7 @@ class Server(object):
         print("**************************1.INfo,set_clients ,init data********************")
         self.samples = 0
         # 初始化资源信息
-        clientinf_path = self.programpath + "dataset/" + self.alpha + "/" + self.dataset + "/clientInfo.json"
+        clientinf_path = os.getcwd() + "dataset/" + self.alpha + "/" + self.dataset + "/clientInfo.json"
         if self.Isgenerate_ClientInfo:
             self.initialize_clients(file_path=clientinf_path)
         self.clientsResource = self.read_clients(clientinf_path)

@@ -18,7 +18,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 
 from selection.fedGCS.autos.model import AUTOS
-from selection.fedGCS.device_env import Evaluator, base_path
+from selection.fedGCS.device_env import Evaluator
 from selection.fedGCS.autos.train_utils import AvgrageMeter, pairwise_accuracy, hamming_distance, FSDataset
 from selection.fedGCS.record import SelectionRecord
 from torchstat import stat

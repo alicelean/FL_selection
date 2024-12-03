@@ -3,8 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils.logger import info
-
 SOS_ID = -1
 EOS_ID = -1
 

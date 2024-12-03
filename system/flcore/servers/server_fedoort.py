@@ -25,19 +25,19 @@ class FedOORT(Server):
         self.penalty_beta = 0
         self.desired_duration = 50
         self.client_utilities = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_durations = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_last_rounds = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_selected_times = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
 
-        self.unexplored_clients = list(range(1, self.num_clients + 1))
+        self.unexplored_clients = list(range(0, self.num_clients ))
 
         self.select_mode = "oort"
         # 设置客户段基本信息
@@ -62,6 +62,7 @@ class FedOORT(Server):
     def calc_client_util(self, client_id):
         # ("""Calculate the client utility.""",
         #  client_durations,desired_duration,current_round,client_last_rounds,client_utilities)
+        #print("self.client_utilities,client_id",self.client_utilities,client_id)
         client_utility = self.client_utilities[client_id] + math.sqrt(
             0.1 * math.log(self.current_round) / self.client_last_rounds[client_id]
         )
@@ -82,11 +83,11 @@ class FedOORT(Server):
             self.client_last_rounds[client.id] = self.current_round
             self.client_selected_times[client.id]=client.select_time
             # Calculate client utilities of explored clients
-        for client in self.clients:
-            self.client_utilities[client.id] = self.calc_client_util(
-                client.id)
-            if self.client_selected_times[client.id] > self.blacklist_num:
-                self.blacklist.append(client.id)
+        for client in self.selected_clients:
+            self.client_utilities[client.id] = self.calc_client_util( client.id)
+            if self.client_selected_times[client.id] > self.blacklist_num :
+                if client.id not in self.blacklist:
+                    self.blacklist.append(client.id)
 
         # Adjust pacer
         utilities=[]
@@ -161,6 +162,7 @@ class FedOORT(Server):
                 self.client_utilities[client_id] / total_utility
                 for client_id in exploited_clients
             ]
+            print("exploited_clients_count",exploited_clients_count,"sorted_by_utility:",sorted_by_utility,"self.blacklist",self.blacklist)
             #从一组客户端中根据计算的概率选择若干客户端，且保证每个客户端被选择的概率与其效用成正比
             if len(probabilities) > 0 and exploited_clients_count > 0:
                 selected_clients = np.random.choice(
@@ -197,15 +199,16 @@ class FedOORT(Server):
 
         # Select unexplored clients randomly
         #从self.unexplored_clients列表中随机选择一部分客户端，直到选出的客户端数量满足需求。
+        samplesize=min( clients_count - len(selected_clients),len(self.unexplored_clients))
         selected_unexplore_clients = random.sample(
-            self.unexplored_clients, clients_count - len(selected_clients)
+            self.unexplored_clients, samplesize
         )
 
         #将当前的随机数生成器状态保存到 self.prng_state 中
         self.prng_state = random.getstate()
         #self.explored_clients 是一个记录已经被选择（探索过）的客户端的列表。通过这行代码，程序更新了已经被探索的客户端列表，避免这些客户端在未来的轮次中再次被选择
         self.explored_clients += selected_unexplore_clients
-        print("selected_unexplore_clients,self.explored_clients", selected_unexplore_clients,self.explored_clients)
+        #print("selected_unexplore_clients,self.explored_clients", selected_unexplore_clients,self.explored_clients)
         for client_id in selected_unexplore_clients:
             self.unexplored_clients.remove(client_id)
 
@@ -214,7 +217,7 @@ class FedOORT(Server):
         # for client in selected_clients:
         #     self.client_selected_times[client] += 1
 
-        print("selected_clients",selected_clients)
+      #  print("selected_clients",selected_clients)
         return selected_clients
 
     def train(self):
@@ -237,18 +240,19 @@ class FedOORT(Server):
             #down load global model--------
             self.send_models()
             # local training----------------
-            print(f"~~" * 20, f"local training is start,self.selected_clients is {len(self.selected_clients)} ID:{ids} ")
+            #print(f"~~" * 20, f"local training is start,self.selected_clients is {len(self.selected_clients)} ID:{ids} ")
             for client in self.selected_clients:
                 client.train()
                 client.select_time+=1
             #更新训练的数据
             self.weights_aggregated()
+            print("round is ",i,"self.blacklist is :",self.blacklist)
             # 计算选中的客户端与总体的差距-----------------------------
 
             kl_div, js_div, emd,round_time,highClientNum=self.record_update(i,ids)
           # for client in self.selected_clients:
             #     client.train(self.queue)
-            print("~~" * 20, "local training is end")
+            #print("~~" * 20, "local training is end")
 
             # # 关闭线程池
             # threa.shutdown(wait=True)
@@ -370,7 +374,7 @@ class FedOORT(Server):
         Returns:
 
         '''
-        print(f"self.selected_clients is {len(self.selected_clients)}")
+        #print(f"self.selected_clients is {len(self.selected_clients)}")
         assert (len(self.selected_clients) > 0)
 
         # active_clients = random.sample(

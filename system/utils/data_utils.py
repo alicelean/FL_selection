@@ -8,7 +8,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 aphla='/'+str(Aphla)
 def read_data(dataset, idx, is_train=True):
     if is_train:
-        train_data_dir = os.path.join(Programpath+'/dataset'+aphla, dataset, 'train/')
+        train_data_dir = os.path.join(os.getcwd()+'/dataset'+aphla, dataset, 'train/')
         #print(train_data_dir)
         train_file = train_data_dir + str(idx) + '.npz'
         # print(f"read datast:{train_file}")
@@ -18,7 +18,7 @@ def read_data(dataset, idx, is_train=True):
         return train_data
 
     else:
-        test_data_dir = os.path.join(Programpath+'/dataset'+aphla, dataset, 'test/')
+        test_data_dir = os.path.join(os.getcwd()+'/dataset'+aphla, dataset, 'test/')
 
         test_file = test_data_dir + str(idx) + '.npz'
         with open(test_file, 'rb') as f:

@@ -8,8 +8,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
-from utils.logger import info
-
 
 class Encoder(nn.Module):
     def __init__(self,

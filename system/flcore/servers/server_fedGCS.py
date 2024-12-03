@@ -16,13 +16,16 @@ class FedGCS(Server):
         super().__init__(args, times)
         self.method = "FedGCS"
        #oort----------------
-        self.collect=False
+        self.collect_rounds=100
+        self.collect=True
+        self.current_round=0
         #记录数据
+        self.clients_pool=[i for i in range(args.num_clients)]
         self.record=[]
         self.L=50
         self.E=50
         self.prng_state=None
-        self.blacklist_num =10
+        self.blacklist_num =20
         self.cut_off =0.95
         self.util_history = []
         self.exploration_factor =0.9
@@ -32,19 +35,19 @@ class FedGCS(Server):
         self.penalty_beta = 0
         self.desired_duration = 50
         self.client_utilities = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_durations = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_last_rounds = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
         self.client_selected_times = {
-            client_id: 0 for client_id in range(1, self.num_clients + 1)
+            client_id: 0 for client_id in range(0, self.num_clients )
         }
 
-        self.unexplored_clients = list(range(1, self.num_clients + 1))
+        self.unexplored_clients = list(range(0, self.num_clients ))
 
         self.select_mode = "oort"
         # 设置客户段基本信息
@@ -69,6 +72,7 @@ class FedGCS(Server):
     def calc_client_util(self, client_id):
         # ("""Calculate the client utility.""",
         #  client_durations,desired_duration,current_round,client_last_rounds,client_utilities)
+        #print("client_utility.keys()",self.client_utilities.keys())
         client_utility = self.client_utilities[client_id] + math.sqrt(
             0.1 * math.log(self.current_round) / self.client_last_rounds[client_id]
         )
@@ -89,7 +93,7 @@ class FedGCS(Server):
             self.client_last_rounds[client.id] = self.current_round
             self.client_selected_times[client.id]=client.select_time
             # Calculate client utilities of explored clients
-        for client in self.clients:
+        for client in self.selected_clients:
             self.client_utilities[client.id] = self.calc_client_util(
                 client.id)
             if self.client_selected_times[client.id] > self.blacklist_num:
@@ -112,16 +116,23 @@ class FedGCS(Server):
                 self.desired_duration += self.pacer_step
 
 
-    def select_clients(self):
+    def select_clients(self,round):
         print("select mode  is oort ,num is :", self.current_num_join_clients)
         clientpool=[]
 
         for client in self.clients:
             clientpool.append(client.id)
-        selected_clients=self.choose_clients(clientpool, self.current_num_join_clients)
+        if round==1:
+            selected_clients = random.sample(self.unexplored_clients,self.current_num_join_clients)
+            for client_id in selected_clients:
+                self.unexplored_clients.remove(client_id)
+        else:
+            selected_clients=self.choose_clients(clientpool, self.current_num_join_clients)
+        self.selected_clients=[]
         for client in self.clients:
             if client.id in selected_clients:
                 self.selected_clients.append(client)
+        print(f"selected_clients num is {(selected_clients)},blacklist num  is {len(self.blacklist)}")
         return selected_clients
 
 
@@ -204,18 +215,19 @@ class FedGCS(Server):
 
         # Select unexplored clients randomly
         #从self.unexplored_clients列表中随机选择一部分客户端，直到选出的客户端数量满足需求。
+        sample_size=min(len(self.unexplored_clients),clients_count - len(selected_clients))
         selected_unexplore_clients = random.sample(
-            self.unexplored_clients, clients_count - len(selected_clients)
+            self.unexplored_clients,sample_size
         )
 
         #将当前的随机数生成器状态保存到 self.prng_state 中
         self.prng_state = random.getstate()
         #self.explored_clients 是一个记录已经被选择（探索过）的客户端的列表。通过这行代码，程序更新了已经被探索的客户端列表，避免这些客户端在未来的轮次中再次被选择
         self.explored_clients += selected_unexplore_clients
-        print("selected_unexplore_clients,self.explored_clients", selected_unexplore_clients,self.explored_clients)
         for client_id in selected_unexplore_clients:
             self.unexplored_clients.remove(client_id)
-
+        print(f"selected_unexplore_clients {len(selected_unexplore_clients)},exploited_clients_count{exploited_clients_count} self.unexplored_clients {len(self.unexplored_clients)}",len(self.explored_clients))
+    
         selected_clients += selected_unexplore_clients
 
         # for client in selected_clients:
@@ -238,7 +250,7 @@ class FedGCS(Server):
             s_t = time.time()
             #训练之前先计算客户端的状态
             # 新增2————————————————————————————————————————————————————————————————————————————————
-            ids=self.select_clients()
+            ids=self.select_clients(i)
             select_id.append([i, ids])
             # ————————————————————————————————————————————————————————————————————————————————
             #down load global model--------
@@ -249,6 +261,7 @@ class FedGCS(Server):
                 client.train()
                 client.select_time+=1
             # 计算选中的客户端与总体的差距-----------------------------
+            self.weights_aggregated()
             kl_div, js_div, emd,round_time,highClientNum=self.record_update(i,ids)
           # for client in self.selected_clients:
             #     client.train(self.queue)
@@ -285,7 +298,7 @@ class FedGCS(Server):
 
             self.Budget.append(time.time() - s_t)
             print('-'*25,"Round is ",i,'-'*25, 'time cost', '-'*25, self.Budget[-1])
-            print('-'*25,"Budget is :",self.Budget)
+           # print('-'*25,"Budget is :",self.Budget)
 
             if self.auto_break and self.check_done(acc_lss=[self.rs_test_acc], top_cnt=self.top_cnt):
                 break
@@ -319,9 +332,10 @@ class FedGCS(Server):
     def train(self):
 
         if self.collect:
-            self.collect_train(self.global_rounds)
-            return 0
-        autos_selection()
+            self.collect_train(self.collect_rounds)
+
+        self.choose_clients(self.clients_pool, self.current_num_join_clients)
+        #autos_selection()
 
 
        #新增1————————————————————————————————————————————————————————————————————————————————
@@ -329,7 +343,7 @@ class FedGCS(Server):
         select_id = []
        # ————————————————————————————————————————————————————————————————————————————————
 
-        for i in range(self.global_rounds+1):
+        for i in range(self.collect_rounds,self.global_rounds+1):
             i += 1
             self.current_round=i
             if self.cost_time > self.total_time or round == self.global_rounds:
@@ -337,13 +351,13 @@ class FedGCS(Server):
             s_t = time.time()
             #训练之前先计算客户端的状态
             # 新增2————————————————————————————————————————————————————————————————————————————————
-            ids=self.select_clients()
+            ids=self.select_clients(i)
             select_id.append([i, ids])
             # ————————————————————————————————————————————————————————————————————————————————
             #down load global model--------
             self.send_models()
             # local training----------------
-            print(f"~~" * 20, f"local training is start,self.selected_clients is {len(self.selected_clients)} ID:{ids} ")
+            #print(f"~~" * 20, f"local training is start,self.selected_clients is {len(self.selected_clients)} ID:{ids} ")
             for client in self.selected_clients:
                 client.train()
                 client.select_time+=1
@@ -351,7 +365,7 @@ class FedGCS(Server):
             kl_div, js_div, emd,round_time,highClientNum=self.record_update(i,ids)
           # for client in self.selected_clients:
             #     client.train(self.queue)
-            print("~~" * 20, "local training is end")
+            #print("~~" * 20, "local training is end")
 
             # # 关闭线程池
             # threa.shutdown(wait=True)

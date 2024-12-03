@@ -1,3 +1,5 @@
+import sys,os
+sys.path.append(os.getcwd()+'/system/flcore/servers')
 import time,os,queue
 from flcore.clients.client_voi import clientVOI
 from flcore.servers.serverbase import Server

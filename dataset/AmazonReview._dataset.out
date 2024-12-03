@@ -1,0 +1,121 @@
+nohup: ignoring input
+sh: 1: -P: not found
+Traceback (most recent call last):
+  File "/root/FL_selection/dataset/generate_AmazonReview.py", line 85, in <module>
+    generate_AmazonReview(dir_path)
+  File "/root/FL_selection/dataset/generate_AmazonReview.py", line 64, in generate_AmazonReview
+    X, y = load_amazon(root)
+  File "/root/FL_selection/dataset/generate_AmazonReview.py", line 12, in load_amazon
+    amazon = np.load(path.join(base_path, "amazon.npz"))
+  File "/root/anaconda3/envs/pytorch_env/lib/python3.10/site-packages/numpy/lib/npyio.py", line 427, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: 'AmazonReview/rawdata/amazon.npz'
+--2024-12-03 16:55:49--  https://drive.google.com/u/0/uc?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Resolving deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)... 172.30.12.181
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 302 Found
+Location: https://drive.google.com/uc?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W [following]
+--2024-12-03 16:55:50--  https://drive.google.com/uc?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Reusing existing connection to drive.google.com:443.
+Proxy request sent, awaiting response... 303 See Other
+Location: https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W [following]
+--2024-12-03 16:55:50--  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:56:21--  (try: 2)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:56:53--  (try: 3)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:57:26--  (try: 4)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:58:00--  (try: 5)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:58:35--  (try: 6)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:59:11--  (try: 7)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 16:59:48--  (try: 8)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:00:26--  (try: 9)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:01:05--  (try:10)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:01:44--  (try:11)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:02:24--  (try:12)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:03:05--  (try:13)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:03:45--  (try:14)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:04:25--  (try:15)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:05:05--  (try:16)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:05:45--  (try:17)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:06:25--  (try:18)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:07:05--  (try:19)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Retrying.
+
+--2024-12-03 17:07:45--  (try:20)  https://drive.usercontent.google.com/download?id=1QbXFENNyqor1IlCpRRFtOluI2_hMEd1W
+Connecting to deq1p.dc.houdeyun.cn (deq1p.dc.houdeyun.cn)|172.30.12.181|:65082... connected.
+Proxy request sent, awaiting response... 504 Gateway Timeout
+Giving up.
+
