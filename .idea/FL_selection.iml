@@ -9,5 +9,6 @@
     <orderEntry type="module" module-name="plot_allresult" />
     <orderEntry type="module" module-name="pythonProject" />
     <orderEntry type="module" module-name="Deep-reinforcement-learning-with-pytorch" />
+    <orderEntry type="module" module-name="GenerativeFL" />
   </component>
 </module>

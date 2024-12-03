@@ -38,7 +38,7 @@ class clientSampler(object):
 
         uniqueId = self.getUniqueId(hostId, clientId)
         user_trace = None if self.user_trace is None else self.user_trace[max(1, clientId%len(self.user_trace))]
-
+        #print("registerClient info is:",hostId, clientId, dis, size, speed, user_trace)
         self.Clients[uniqueId] = Client(hostId, clientId, dis, size, speed, user_trace)
 
         # remove clients
@@ -46,7 +46,7 @@ class clientSampler(object):
             self.feasibleClients.append(clientId)
             self.feasible_samples += size
 
-            if self.mode == "oort":
+            if self.mode == "oort" or self.mode=='pyramidFy':
                 # feedbacks = {'reward':min(size, self.args.upload_epoch*self.args.batch_size),'duration':duration}
                 feedbacks = {'reward':size,'duration':duration,'gradient':size,}
                 self.ucbSampler.register_client(clientId, feedbacks=feedbacks)
@@ -61,13 +61,18 @@ class clientSampler(object):
         return self.Clients[self.getUniqueId(0, clientId)]
 
     def registerDuration(self, clientId, batch_size, upload_epoch, model_size):
-        if self.mode == "oort":
+        if self.mode == "oort" or self.mode=='pyramidFy':
             roundDuration,roundDurationLocal,roundDurationComm = self.Clients[self.getUniqueId(0, clientId)].getCompletionTime(
                     batch_size=batch_size, upload_epoch=upload_epoch, model_size=model_size
             )
+            # print("registerDuration", clientId, self.getUniqueId(0, clientId), roundDuration, roundDurationLocal,
+            #       roundDurationComm)
+
             self.ucbSampler.update_duration(clientId, roundDuration)
 
     def getCompletionTime(self, clientId, batch_size, upload_epoch, model_size):
+        #返回每个客户端的计算资源、通信资源
+        #print(f"client id {clientId},use self.getUniqueId(0, clientId) is {self.getUniqueId(0, clientId)}")
         return self.Clients[self.getUniqueId(0, clientId)].getCompletionTime(
                 batch_size=batch_size, upload_epoch=upload_epoch, model_size=model_size
             )
@@ -78,7 +83,7 @@ class clientSampler(object):
 
     def registerScore(self, clientId, reward, gradient,auxi=1.0, time_stamp=0, duration=1., success=True):
         # currently, we only use distance as reward
-        if self.mode == "oort":
+        if self.mode == "oort" or self.mode=='pyramidFy':
             feedbacks = {
                 'reward': reward,
                 'gradient': gradient,
@@ -86,6 +91,7 @@ class clientSampler(object):
                 'status': True,
                 'time_stamp': time_stamp
             }
+            # print("(feedbacks['gradient']",feedbacks['gradient'])
 
             self.ucbSampler.update_client_util(clientId, feedbacks=feedbacks)
 
@@ -126,10 +132,19 @@ class clientSampler(object):
 
     def clientOnHost(self, clientIds, hostId):
         self.clientOnHosts[hostId] = clientIds
+    def getclientOnHost(self,hostId):
+        return self.clientOnHosts[hostId]
+
     def clientLocalEpochOnHost(self, clientLocalEpochs, hostId):
+        #print(f"client {hostId},clientLocalEpochs is{clientLocalEpochs}")
         self.clientLocalEpochOnHosts[hostId] = clientLocalEpochs
+    def getclientLocalEpochOnHost(self, hostId):
+        return self.clientLocalEpochOnHosts[hostId]
     def clientDropoutratioOnHost(self, clientDropoutRatios, hostId):
+        #print(f"client {hostId},clientDropoutRatios is{clientDropoutRatios}")
         self.clientDropoutRatioOnHosts[hostId] = clientDropoutRatios
+    def getclientDropoutratioOnHost(self, hostId):
+        return self.clientDropoutRatioOnHosts[hostId]
 
     def getCurrentClientIds(self, hostId):
         return self.clientOnHosts[hostId]
@@ -211,6 +226,7 @@ class clientSampler(object):
 
     def getClientGradient(self, clientId):
         if self.mode == "oort":
+            #print(f"getClientGradient self.mode is {self.mode}")
             return self.ucbSampler.get_client_metric(clientId)
         else:
             feedbacks = {

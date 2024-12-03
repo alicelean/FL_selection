@@ -16,126 +16,88 @@ class clientVOI(Client):
         self.enable_dropout = args.enable_dropout
         self.nextClientDropoutRatio = None
 
-    def train(self, queue,round):
+
+    def train(self,tr):
         #if client.id ==0:
         #print(f"client {self.id} start train round is {round}-------------------- ")
         # 1.--------- score = -1
-        score = -1
-        LocalDropoutRatio = 0 if self.nextClientDropoutRatio == None or not self.enable_dropout else \
-        self.nextClientDropoutRatio[
-            self.id]
-        dropout_ratio = LocalDropoutRatio
-        trainedModels = []
-        preTrainedLoss = []
-        trainedSize = []
-        trainSpeed = []
-        virtualClock = []
-        ranClients = []
-        local_trained = 0
-        count = 0
+        self.stale=tr-self.td
         last_model_tensors = []
         for idx, param in enumerate(self.model.parameters()):
             last_model_tensors.append(copy.deepcopy(param.data))
-        epoch_train_loss = None
         self.loss = nn.CrossEntropyLoss(reduction='none')
+
         # -------------------
 
         trainloader = self.load_train_data()
         # self.model.to(self.device)
-        self.model.train()
 
         # differential privacy
         if self.privacy:
             self.model, self.optimizer, trainloader, privacy_engine = \
                 initialize_dp(self.model, self.optimizer, trainloader, self.dp_sigma)
 
-        start_time = time.time()
-        run_start = time.time()
         max_local_epochs = self.local_epochs
         if self.train_slow:
             max_local_epochs = np.random.randint(1, max_local_epochs // 2)
-
-        for step in range(max_local_epochs):
-            for i, (x, y) in enumerate(trainloader):
-                if type(x) == type([]):
-                    x[0] = x[0].to(self.device)
-                else:
-                    x = x.to(self.device)
-                y = y.to(self.device)
-                if self.train_slow:
-                    time.sleep(0.1 * np.abs(np.random.rand()))
-                output = self.model(x)
-                loss = self.loss(output, y)
-                # ------------------------
-                # only measure the loss of the first epoch
-                if step == 1:
-                    local_trained += len(y)
-                    temp_loss = 0.
-                    # loss_list = loss.tolist() if args.task != 'nlp' else [loss.item()]
-                    loss_list = loss.tolist()
-                    for l in loss_list:
-                        temp_loss += l ** 2
-                    loss_cnt = len(loss_list)
-                    temp_loss = temp_loss / float(loss_cnt)
-                    if epoch_train_loss is None:
-                        epoch_train_loss = temp_loss
-                    else:
-                        epoch_train_loss = (1. - self.loss_decay) * epoch_train_loss + self.loss_decay * temp_loss
-                count += len(y)
-                loss = loss.mean()  # 对损失取平均值
-                # ------------------------------
-
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-            #缓存每次训练后的模型
-            for new_param, old_param in zip(self.model.parameters(), self.localmodel.parameters()):
+        flag=True
+        i=0
+        #统计资源消耗
+        self.costedResoure=0
+        while flag:
+            #print(f"client {self.id} start the {i} th local epoch,max_local_epochs is {max_local_epochs} ")
+            #-------取全局模型-----
+            start_time = time.time()
+            #记录获取全局模型的时间
+            self.td=time.time()+self.communicate
+            for new_param, old_param in zip(self.globalModel.parameters(), self.model.parameters()):
                 old_param.data = new_param.data.clone()
-            #计算本地模型的损失
-            losses, train_num=self.train_metricsWithmodel()
-            self.currentloss = (losses * 1.0)
-            self.avgloss = (losses * 1.0) / train_num
-            #print(f"update client is{self.id},self.currentloss is {self.currentloss}")
-            #计算资源差异
-            time.sleep(self.compute)
+            self.costedResoure+=self.communicate
+            self.model.train()
+            #------------------------
 
+            for step in range(max_local_epochs):
+                for i, (x, y) in enumerate(trainloader):
+                    if type(x) == type([]):
+                        x[0] = x[0].to(self.device)
+                    else:
+                        x = x.to(self.device)
+                    y = y.to(self.device)
+                    if self.train_slow:
+                        time.sleep(0.1 * np.abs(np.random.rand()))
+                    output = self.model(x)
+                    loss = self.loss(output, y)
+                    loss =loss.mean()
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+                #缓存每次训练后的模型local model---------
+                for new_param, old_param in zip(self.model.parameters(), self.localmodel.parameters()):
+                    old_param.data = new_param.data.clone()
 
-            #self.localmodel.load_state_dict(self.model.state_dict())
+                #-----------------------------------------------
+                #计算本地模型的损失
+                losses, train_num=self.train_metricsWithmodel()
+                self.currentloss = (losses * 1.0)
+                self.avgloss = (losses * 1.0) / train_num
+                #print(f"update client is{self.id},self.currentloss is {self.currentloss}")
+                #计算资源差异
+                # time.sleep(self.compute)
+            self.costedResoure += self.compute*max_local_epochs
+            self.costedResoure += self.communicate
 
-        # self.model.cpu()
-        #
-        # ---------------------------------------------------------------
-        time_spent = time.time() - run_start
-        if count > 0:
-            speed = time_spent / float(count)
-        if self.id in self.global_client_profile:
-            time_cost = self.global_client_profile[self.id][0] * count + self.global_client_profile[self.id][1]
-        else:
-            time_cost = time_spent
-        model_param = [(param.data - last_model_tensors[idx]).cpu().numpy() * (random.uniform(0, 1) >= dropout_ratio)
-                       for idx, param in enumerate(self.model.parameters())]
-        trainedModels.append(model_param)
-        preTrainedLoss.append(epoch_train_loss if score == -1 else score)
-        trainedSize.append(local_trained)
-        trainSpeed.append(str(speed) + '_' + str(count))
-        virtualClock.append(time_cost)
-        ranClients.append(self.id)
-        # ---------------------------------------------------------------------
-        # print("ssss:",preTrainedLoss,trainedSize,trainSpeed,virtualClock,ranClients)
-        isComplete = True
-        testResults = None
-        # queue.put({self.id: [trainedModels, preTrainedLoss, trainedSize, isComplete, ranClients, trainSpeed, testResults,
-        #                   virtualClock]})
+            flag=False
+        #print(f"client {self.id} end the {i} th local epoch,max_local_epochs is {max_local_epochs} ")
 
         if self.learning_rate_decay:
             self.learning_rate_scheduler.step()
 
         self.train_time_cost['num_rounds'] += 1
         self.train_time_cost['total_cost'] += time.time() - start_time
-
-        if self.privacy:
-            eps, DELTA = get_dp_params(privacy_engine)
-            print(f"Client {self.id}", f"epsilon = {eps:.2f}, sigma = {DELTA}")
+        #print(f"Client {self.id} success!")
+        # if self.privacy:
+        #     eps, DELTA = get_dp_params(privacy_engine)
+        #     print(f"Client {self.id}", f"epsilon = {eps:.2f}, sigma = {DELTA}")
 
     def localtrain(self):
         trainloader = self.load_train_data()

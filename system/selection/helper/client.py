@@ -43,6 +43,10 @@ class Client(object):
         return False
 
     def getCompletionTime(self, batch_size, upload_epoch, model_size):
+        '''batch_size：训练时的批量大小，即每次训练时使用的数据量。
+        upload_epoch：上传的轮次数，表示每一轮本地训练时的迭代次数。
+        model_size：模型的大小，通常以字节或兆字节（MB）计，表示模型的参数量和占用的存储空间。'''
+
         roundDurationLocal=3.0 * batch_size * upload_epoch/float(self.compute_speed)
 
         roundDurationComm=model_size/float(self.bandwidth)

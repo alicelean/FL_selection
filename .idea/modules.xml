@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../Deep-reinforcement-learning-with-pytorch/.idea/Deep-reinforcement-learning-with-pytorch.iml" filepath="$PROJECT_DIR$/../Deep-reinforcement-learning-with-pytorch/.idea/Deep-reinforcement-learning-with-pytorch.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/FL_selection.iml" filepath="$PROJECT_DIR$/.idea/FL_selection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../GenerativeFL/.idea/GenerativeFL.iml" filepath="$PROJECT_DIR$/../GenerativeFL/.idea/GenerativeFL.iml" />
       <module fileurl="file://$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" filepath="$PROJECT_DIR$/../PFLlib/.idea/PFLlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" filepath="$PROJECT_DIR$/../PyramidFL/.idea/PyramidFL.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../plot_allresult/.idea/plot_allresult.iml" filepath="$PROJECT_DIR$/../../plot_allresult/.idea/plot_allresult.iml" />

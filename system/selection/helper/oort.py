@@ -213,12 +213,14 @@ class _training_selector(object):
         @ feedbacks['duration']: system utility
         @ feedbacks['count']: times of involved
         '''
+        #print(f"before update client {clientId} is { self.totalArms[clientId]['reward']}")
         self.totalArms[clientId]['reward'] = feedbacks['reward']
         self.totalArms[clientId]['duration'] = feedbacks['duration']
         self.totalArms[clientId]['time_stamp'] = feedbacks['time_stamp']
         self.totalArms[clientId]['count'] += 1
         self.totalArms[clientId]['status'] = feedbacks['status']
         self.totalArms[clientId]['gradient'] = feedbacks['gradient']
+        #print(f"after update client {clientId} is { self.totalArms[clientId]['reward']}")
 
         self.unexplored.discard(clientId)
         self.successfulClients.add(clientId)

@@ -5,11 +5,11 @@ import itertools
 
 
 class FederatedLearningEnv(gym.Env):
-    def __init__(self, num_clients, k):
+    def __init__(self, num_clients, k,feature=4):
         super(FederatedLearningEnv, self).__init__()
         self.num_clients = num_clients
         self.select_num = k  # 每次选择 k 个客户端
-        self.feature=4
+        self.feature=feature
         #为每一个客户端输出一个价值。
         self.action_space = spaces.Box(low=0.0, high=1.0, shape=(num_clients,))
         # 状态空间：每个客户端的状态（如计算能力、数据量、延迟等）

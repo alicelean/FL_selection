@@ -8,7 +8,11 @@ import warnings
 import numpy as np
 import torchvision
 import logging
+from flcore.servers.server_fedGCS import FedGCS
+from flcore.servers.server_fedoort import FedOORT
 from flcore.servers.server_voi import FedVOI
+from flcore.servers.server_Div import FedDIV
+from flcore.servers.server_RL import FedRL
 from flcore.servers.server_pyramid import FedPyramid
 from flcore.servers.serveravg import FedAvg
 from flcore.servers.serverpFedMe import pFedMe
@@ -176,8 +180,18 @@ def run(args):
             server = FedAvg(args, i)
         elif args.algorithm == "FedVOI":
             server = FedVOI(args, i)
+        elif args.algorithm == "FedRL":
+            server = FedRL(args, i)
         elif args.algorithm == "FedPyramid":
             server = FedPyramid(args, i)
+        elif args.algorithm == "FedDIV":
+            server = FedDIV(args, i)
+        elif args.algorithm == "FedGCS":
+            server = FedGCS(args, i)
+        elif args.algorithm == "FedOORT":
+            server = FedOORT(args, i)
+
+
 
         elif args.algorithm == "Local":
             server = Local(args, i)
@@ -422,9 +436,14 @@ if __name__ == "__main__":
 
     #pyramidFL
     parser.add_argument('--loss_decay', type=float, default=0.2)
-    parser.add_argument('--enable_dropout', type=bool, default=False,
+    parser.add_argument('--enable_dropout', type=bool, default=True,
                         help="enable local updates dropout for local training")
-    parser.add_argument('--upload_epoch', type=int, default=10)
+    parser.add_argument('--dropout_low', default=0.1, help='dropout ratio for model parameterization', type=float)
+    parser.add_argument('--dropout_high', default=0.6, help='dropout ratio for model parameterization', type=float)
+    parser.add_argument('-tw','--total_worker', type=int, default=100)
+
+
+    parser.add_argument('--upload_epoch', type=int, default=5)
     parser.add_argument('--model_size', type=float, default=65536)
     parser.add_argument('--clock_factor', type=float, default=2.5, help="Refactor the clock time given the profile")
     parser.add_argument('--sample_mode', type=str, default='random')
@@ -444,21 +463,32 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_device', type=int, default=0)
     parser.add_argument('--mechinedevice', type=str, default='cpu')
     parser.add_argument('--capacity_bin', type=bool, default=True)
-    parser.add_argument('--enable_adapt_local_epoch', type=bool, default=False,
+
+    parser.add_argument('--enable_adapt_local_epoch', type=bool, default=True,
                         help="enable local epoch adaption for local training")
+
     parser.add_argument('--noise_factor', type=float, default=0)
     parser.add_argument('--stale_threshold', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--resampling_interval', type=int, default=1)
-    parser.add_argument('--total_worker', type=int, default=0)
     parser.add_argument('--overcommit', type=float, default=1)
     parser.add_argument('--fixed_clients', type=bool, default=False)
     parser.add_argument('--load_model', type=bool, default=False)
     parser.add_argument('-slmd','--select_mode', type=str, default='random')
-
-
-
-#----------rl---------
+    parser.add_argument('--adaptive_epoch_beta', default=1, help='dropout ratio for model parameterization', type=float)
+    parser.add_argument('--exploration_factor', type=float, default=0.9)
+    parser.add_argument('--exploration_decay', type=float, default=0.95)
+    parser.add_argument('--exploration_min', type=float, default=0.2)
+    parser.add_argument('--exploration_alpha', type=float, default=0.3)
+    parser.add_argument('--round_threshold', type=float, default=10)
+    parser.add_argument('--sample_window', type=float, default=5.0)
+    parser.add_argument('--blacklist_rounds', type=int, default=-1)
+    parser.add_argument('--pacer_step', type=int, default=20)
+    parser.add_argument('--clip_bound', type=float, default=0.98)
+    parser.add_argument('--cut_off_util', type=float, default=0.7)
+    parser.add_argument('--round_penalty', type=float, default=2.0)
+    parser.add_argument('--pacer_delta', type=float, default=5)
+    #----------rl---------
     parser.add_argument('--mode', dest='mode', type=str, default='train')  # can be 'train' or 'test'
     parser.add_argument('--actor_model', dest='actor_model', type=str, default='')  # your actor model filename
     parser.add_argument('--critic_model', dest='critic_model', type=str, default='')  # your critic model filename

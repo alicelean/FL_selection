@@ -10,9 +10,9 @@ from utils.dataset_utils import check, separate_data, split_data, save_file
 
 random.seed(1)
 np.random.seed(1)
-num_clients = 500
+num_clients = 100
 num_classes = 10
-dir_path = "mnist/"
+dir_path = "test/mnist/"
 
 
 # Allocate data to users

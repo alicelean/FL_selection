@@ -1,43 +1,20 @@
-import torch, random
+import torch
 import torch.nn as nn
 import numpy as np
-import time, copy
+import time
 from flcore.clients.clientbase import Client
 from utils.privacy import *
-from sklearn.preprocessing import label_binarize
-from sklearn import metrics
 
 
-class clientVOI(Client):
+class clientOUR(Client):
     def __init__(self, args, id, traindata, testsdata, train_samples, test_samples, **kwargs):
         super().__init__(args, id, traindata, testsdata, train_samples, test_samples, **kwargs)
-        self.loss_decay = args.loss_decay
-        self.global_client_profile = []
-        self.enable_dropout = args.enable_dropout
-        self.nextClientDropoutRatio = None
+        params_l=list(self.model.parameters())
+        self.currGrad = [(torch.ones_like(param.data) * 0).to(self.device) for param in params_l]
+        self.round=0
+        self.k=100000000000
 
-    def train(self, queue):
-        # 1.--------- score = -1
-        score = -1
-        LocalDropoutRatio = 0 if self.nextClientDropoutRatio == None or not self.enable_dropout else \
-        self.nextClientDropoutRatio[
-            self.id]
-        dropout_ratio = LocalDropoutRatio
-        trainedModels = []
-        preTrainedLoss = []
-        trainedSize = []
-        trainSpeed = []
-        virtualClock = []
-        ranClients = []
-        local_trained = 0
-        count = 0
-        last_model_tensors = []
-        for idx, param in enumerate(self.model.parameters()):
-            last_model_tensors.append(copy.deepcopy(param.data))
-        epoch_train_loss = None
-        self.loss = nn.CrossEntropyLoss(reduction='none')
-        # -------------------
-
+    def train(self):
         trainloader = self.load_train_data()
         # self.model.to(self.device)
         self.model.train()
@@ -48,7 +25,7 @@ class clientVOI(Client):
                 initialize_dp(self.model, self.optimizer, trainloader, self.dp_sigma)
 
         start_time = time.time()
-        run_start = time.time()
+
         max_local_epochs = self.local_epochs
         if self.train_slow:
             max_local_epochs = np.random.randint(1, max_local_epochs // 2)
@@ -64,53 +41,14 @@ class clientVOI(Client):
                     time.sleep(0.1 * np.abs(np.random.rand()))
                 output = self.model(x)
                 loss = self.loss(output, y)
-                # ------------------------
-                # only measure the loss of the first epoch
-                if step == 1:
-                    local_trained += len(y)
-                    temp_loss = 0.
-                    # loss_list = loss.tolist() if args.task != 'nlp' else [loss.item()]
-                    loss_list = loss.tolist()
-                    for l in loss_list:
-                        temp_loss += l ** 2
-                    loss_cnt = len(loss_list)
-                    temp_loss = temp_loss / float(loss_cnt)
-                    if epoch_train_loss is None:
-                        epoch_train_loss = temp_loss
-                    else:
-                        epoch_train_loss = (1. - self.loss_decay) * epoch_train_loss + self.loss_decay * temp_loss
-                count += len(y)
-                loss = loss.mean()  # 对损失取平均值
-                # ------------------------------
-
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
         # self.model.cpu()
-        #
-        # ---------------------------------------------------------------
-        time_spent = time.time() - run_start
-        if count > 0:
-            speed = time_spent / float(count)
-        if self.id in self.global_client_profile:
-            time_cost = self.global_client_profile[self.id][0] * count + self.global_client_profile[self.id][1]
-        else:
-            time_cost = time_spent
-        model_param = [(param.data - last_model_tensors[idx]).cpu().numpy() * (random.uniform(0, 1) >= dropout_ratio)
-                       for idx, param in enumerate(self.model.parameters())]
-        trainedModels.append(model_param)
-        preTrainedLoss.append(epoch_train_loss if score == -1 else score)
-        trainedSize.append(local_trained)
-        trainSpeed.append(str(speed) + '_' + str(count))
-        virtualClock.append(time_cost)
-        ranClients.append(self.id)
-        # ---------------------------------------------------------------------
-        # print("ssss:",preTrainedLoss,trainedSize,trainSpeed,virtualClock,ranClients)
-        isComplete = True
-        testResults = None
-        # queue.put({self.id: [trainedModels, preTrainedLoss, trainedSize, isComplete, ranClients, trainSpeed, testResults,
-        #                   virtualClock]})
+
+        #计算梯度
+
 
         if self.learning_rate_decay:
             self.learning_rate_scheduler.step()
@@ -121,6 +59,105 @@ class clientVOI(Client):
         if self.privacy:
             eps, DELTA = get_dp_params(privacy_engine)
             print(f"Client {self.id}", f"epsilon = {eps:.2f}, sigma = {DELTA}")
+
+    def update_parameter(self, gradient, eta_P):
+        """
+        更新参数 P_{i,t+1} 依据公式 (e4)
+
+        参数:
+        - pit: 当前参数 P_{i,t} (标量)
+        - gradients: 当前的梯度 (张量)
+        - W_i: 当前的权重数组 (张量)
+        - D_i: 当前数据大小 (标量)
+        - D: 总数据大小 (标量)
+        - eta_P: 学习率 (标量)
+        - t: 当前时间步 (标量)
+        - k: 常量 (标量)
+
+        返回:
+        - P_{i,t+1} 的更新值
+        """
+        # 计算 \tilde{\phi}(P_{i,t}) 和导数
+        if self.round==0:
+            self.pit=self.sizerate
+        self.round += 1
+        #print("init pit",self.pit)
+        _,phi_deriv = self.phi_derivative(self.pit)
+        params_l = list(self.model.parameters())
+        # phi_deriv= [(torch.ones_like(param.data) * phi_deriv).to(self.device) for param in params_l]
+        pit=[(torch.ones_like(param.data) * self.pit).to(self.device) for param in params_l]
+        # 更新 P_{i,t+1}
+        #print("before self.pit",phi_deriv)
+        for p, allg in zip(pit,gradient):
+            p.data = p- torch.mul(allg,0.001 *self.sizerate*self.sizerate)
+
+        #print("梯度",pit)  # 打印梯度
+        mean_gradient_norm = sum(torch.norm(g) for g in pit) / len(pit)
+        #print("self.pit", mean_gradient_norm)
+        self.pit=mean_gradient_norm.item()
+
+    def phi(self, x):
+        """计算函数 \tilde{\phi}(x) 的值"""
+        # 计算 phi 值(-self.k * (x - 0.5)))
+        #print("qqq",x,1.0 / (1 +np.exp(- (x - 0.5) )))
+        return 1.0 / (1 + np.exp(- (x-0.5)))
+
+    def phi_derivative(self, x):
+        """计算函数 \tilde{\phi}(x) 的导数"""
+
+        phi_value = self.phi(x)
+        #print("phi_value",phi_value)
+        # 计算导数
+        return phi_value, self.k * phi_value * (1 - phi_value)
+
+    # def phi(self, x):
+    #     """计算函数 \tilde{\phi}(x) 的值"""
+    #     # 确保输入是一个 tensor，如果是列表则将其转换为 tensor
+    #     x_tensor = torch.tensor(x) if isinstance(x, list) else x
+    #     # 计算 phi 值
+    #     return 1 / (1 + torch.exp(-self.k * (x_tensor - 0.5)))
+    #
+    # def phi_derivative(self, x):
+    #     """计算函数 \tilde{\phi}(x) 的导数"""
+    #     # 确保输入是一个 tensor，如果是列表则将其转换为 tensor
+    #     x_tensor = torch.tensor(x) if isinstance(x, list) else x
+    #     phi_value = self.phi(x_tensor)
+    #     # 计算导数
+    #     return phi_value, self.k * phi_value * (1 - phi_value)
+
+    def calculate_gradients(self, global_model: nn.Module):
+        trainloader = self.load_train_data()
+        globallosess = nn.CrossEntropyLoss()
+        optimizer = torch.optim.SGD(global_model.parameters(), lr=0)
+        global_model.eval()  # 设置模型为评估模式
+        print(self.id,len(trainloader))
+        params_g = list(global_model.parameters())
+        self.currGrad = [(torch.ones_like(param.data) * 0).to(self.device) for param in params_g]
+        for i, (x, y) in enumerate(trainloader):
+            # 将输入数据移动到指定设备
+            if type(x) == type([]):
+                x[0] = x[0].to(self.device)
+            else:
+                x = x.to(self.device)
+            y = y.to(self.device)
+            # 前向传播
+            output = global_model(x)
+            # 计算损失
+            loss = globallosess(output, y)
+            # 清除之前的梯度
+            optimizer.zero_grad()
+            # 反向传播计算梯度
+            loss.backward()
+            # 保存当前梯度
+            for para_g, upgrad in zip(params_g, self.currGrad):
+                upgrad.data = upgrad + torch.mul(para_g.grad,1)
+            #print(type(self.currGrad))
+                # # 计算梯度张量的平均范数
+                # mean_gradient_norm = sum(torch.norm(g) for g in self.updategrad) / len(self.updategrad)
+                # # 判断平均范数是否小于阈值
+                # if mean_gradient_norm < 0.00001:
+                #     print("平均梯度范数小于阈值，停止训练")
+            # 不调用 self.optimizer.step()，这样不会更新模型参数
 
     def localtrain(self):
         trainloader = self.load_train_data()
@@ -165,104 +202,10 @@ class clientVOI(Client):
             eps, DELTA = get_dp_params(privacy_engine)
             print(f"Client {self.id}", f"epsilon = {eps:.2f}, sigma = {DELTA}")
 
-    def test_metrics_global(self, model):
-        testloaderfull = self.load_test_data()
-        if testloaderfull is None:
-            print("client test_metrics Error: Failed to load test data.")
-            return None
 
-        # self.model = self.load_model('model')
-        # self.model.to(self.device)
-        model.eval()
 
-        test_acc = 0
-        test_num = 0
-        y_prob = []
-        y_true = []
-        # 记录NaN值的数量
-        nan_x = 0
-        nan_y = 0
-        nan_output = 0
-        with torch.no_grad():
-            for x, y in testloaderfull:
-                if type(x) == type([]):
-                    x[0] = x[0].to(self.device)
-                else:
-                    x = x.to(self.device)
-                y = y.to(self.device)
 
-                # 检查输入数据中是否存在NaN值
-                if self.dataset != 'agnews':
-                    if torch.isnan(x).any():
-                        nan_x += 1
-                        continue
-                    if torch.isnan(y).any():
-                        nan_y += 1
 
-                output = model(x)
-
-                # 检查模型输出中是否存在NaN值
-                if self.dataset != 'agnews':
-                    if torch.isnan(output).any():
-                        nan_output += 1
-                        continue
-
-                test_acc += (torch.sum(torch.argmax(output, dim=1) == y)).item()
-                test_num += y.shape[0]
-
-                y_prob.append(output.detach().cpu().numpy())
-                nc = self.num_classes
-                if self.num_classes == 2:
-                    nc += 1
-                lb = label_binarize(y.detach().cpu().numpy(), classes=np.arange(nc))
-                if self.num_classes == 2:
-                    lb = lb[:, :2]
-                y_true.append(lb)
-        # self.model.cpu()
-        # self.save_model(self.model, 'model')
-        nan_count = nan_x + nan_y + nan_output
-        if nan_count > 0:
-            nan_ratio = nan_count / len(testloaderfull)  # 计算NaN值在测试数据中的比例
-            print(
-                f"client {self.id} ,nan_x {nan_x},nan_y {nan_y},nan_output {nan_output},total NaN value ratio in test data: {nan_ratio:.2%}")
-        if nan_count != len(testloaderfull):
-            y_prob = np.concatenate(y_prob, axis=0)
-            y_true = np.concatenate(y_true, axis=0)
-
-            auc = metrics.roc_auc_score(y_true, y_prob, average='micro')
-
-            return test_acc, test_num, auc
-        else:
-            print(f"ERROR:testloaderfull {len(testloaderfull)},nan_count {nan_count}, test_num {test_num}")
-            return 0, test_num, 0
-
-    def train_metrics_global(self, model):
-        trainloader = self.load_train_data()
-        # self.model = self.load_model('model')
-        # self.model.to(self.device)
-        model.eval()
-
-        train_num = 0
-        losses = 0
-        with torch.no_grad():
-            for x, y in trainloader:
-                if type(x) == type([]):
-                    x[0] = x[0].to(self.device)
-                else:
-                    x = x.to(self.device)
-                y = y.to(self.device)
-                output = model(x)
-                # print("model print",output ,y)
-                loss = self.loss(output, y)
-                # print("test:",loss.shape)
-                loss = loss.mean()
-                train_num += y.shape[0]
-                losses += loss.item() * y.shape[0]
-
-        # self.model.cpu()
-        # self.save_model(self.model, 'model')
-
-        return losses, train_num
 
 
 

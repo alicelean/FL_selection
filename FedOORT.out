@@ -1,0 +1,9 @@
+['/Users/alice/Desktop/python/FL_selection/system', '/Users/alice/anaconda3/envs/pytorch_env/lib/python310.zip', '/Users/alice/anaconda3/envs/pytorch_env/lib/python3.10', '/Users/alice/anaconda3/envs/pytorch_env/lib/python3.10/lib-dynload', '/Users/alice/anaconda3/envs/pytorch_env/lib/python3.10/site-packages', './IJCAI-AutoS']
+Traceback (most recent call last):
+  File "/Users/alice/Desktop/python/FL_selection/system/main.py", line 11, in <module>
+    from flcore.servers.server_fedGCS import FedGCS
+  File "/Users/alice/Desktop/python/FL_selection/system/flcore/servers/server_fedGCS.py", line 12, in <module>
+    from selection.fedGCS.autos.train import autos_selection
+  File "/Users/alice/Desktop/python/FL_selection/system/selection/fedGCS/autos/train.py", line 20, in <module>
+    from autos.model import AUTOS
+ModuleNotFoundError: No module named 'autos'

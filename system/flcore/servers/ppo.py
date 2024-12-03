@@ -304,10 +304,13 @@ class PPO:
 			#print("多维正太分布的动作 log_prob:", log_prob, action)
 			return action.detach().numpy(), log_prob.detach()
 		else:
-			Actionprobabilities = torch.softmax(mean, dim=1)
-			top_k_probs, top_k_indices = torch.topk(Actionprobabilities, self.env.select_num)
-			#v = self.critic(obs)
-			return top_k_indices.detach().numpy(), Actionprobabilities.detach()
+
+			return mean
+
+			# Actionprobabilities = torch.softmax(mean, dim=1)
+			# top_k_probs, top_k_indices = torch.topk(Actionprobabilities, self.env.select_num)
+			# #v = self.critic(obs)
+			# return top_k_indices.detach().numpy(), Actionprobabilities.detach()
 
 	def evaluate(self, batch_obs, batch_acts):
 		"""
@@ -334,7 +337,7 @@ class PPO:
 		# Calculate the log probabilities of batch actions using most recent actor network.
 		# This segment of code is similar to that in get_action()
 		action_mean = self.actor(batch_obs)
-		#print("mean is ", mean.shape,"batch_acts is ", batch_acts.shape)
+		#print("mean is ", action_mean,"batch_obs is ",batch_obs)
 
 		dist = MultivariateNormal(action_mean, self.cov_mat)
 		log_probs = dist.log_prob(batch_acts)

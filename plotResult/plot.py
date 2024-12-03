@@ -1,6 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+
+
 #---------client selectiion----------------------
 def plot_multiline(path,x,ylist,labellist,colist,title,value,dataset,alpha,xlabel):
     '''
@@ -81,13 +88,17 @@ def plot_select(fpath,picpath,value,dataset,alpha,xlabel,length=-1):
 
     '''
     # 读取txt文件，指定列名
-    data = pd.read_csv(fpath, delimiter=',',
-                       names=['1', 'case', 'method', 'group', 'Loss', 'Accuracy', 'AUC', 'Std Test Accuracy',
-                              'Std Test AUC', 'select_mode'])
-    print("read data from :",fpath)
-    methods= data['select_mode'].unique()
-    #['method' 'FedJS' 'FedAvg' 'FedALA_AAW' 'FedAAW' 'FedALA' 'SCAFFOLD''FedProx' 'MOON']
-    print("method is",methods,len(methods))
+    data = pd.read_csv(fpath,header=0)
+    print("read data from :",fpath,data.head(5))
+    # 查看列名
+    print(data.columns)
+    # 清理列名中的空格
+    data.columns = data.columns.str.strip()
+
+    # 检查数据类型
+    for i in data.columns:
+        print(i," data",data[i].tolist())
+
     # 按照method分组
     title=value+" trend of different algorithms"
     labellist = []
@@ -96,16 +107,16 @@ def plot_select(fpath,picpath,value,dataset,alpha,xlabel,length=-1):
     #last accuracy
     repoints=[]
     # 按照method分组
-    grouped_data = data.groupby('select_mode')
+    grouped_data = data.groupby('method')
     for name, group in grouped_data:
-        print(group[value].dtypes)
+        print("sss",group[value].dtypes)
         # 转换数据类型，如果不是数值类型的话
         group[value] = pd.to_numeric(group[value], errors='coerce')
-
-        smoothed_loss = group[value].rolling(window=5, min_periods=1).mean()
+        smoothed_loss = group[value].rolling(window=1, min_periods=1).mean()
 
         print("add",name)
         print("value is",len(smoothed_loss))
+
         if length==-1:
             acc=smoothed_loss.tolist()
         else:
@@ -122,7 +133,7 @@ def plot_select(fpath,picpath,value,dataset,alpha,xlabel,length=-1):
         # repoints.append([str(round(acc[-1],4)),name])
 
     # print("TTA:", points)
-    #print("accracy", repoints)
+    print("accracy", ylist)
     x = [i for i in range(len(ylist[0]))]
 
     # colist=['red','yellow','blue','green','black','pink','orange']
@@ -142,22 +153,239 @@ def plot_select(fpath,picpath,value,dataset,alpha,xlabel,length=-1):
     #colist = ['red',  'blue', 'green', 'black', 'orange']
     print(f"must equal len(ylist)={len(ylist)}, len(colist)={ len(colist)},labellist={len(labellist)}")
     plot_multiline(picpath,x,ylist,labellist,colist,title,value,dataset,alpha,xlabel)
+def normalize_list(data):
+    #print("data is ",data)
+    data=[float(i) for i in data]
+    min_val = min(data)  # 找到最小值
+    max_val = max(data)  # 找到最大值
+    if max_val - min_val == 0:  # 避免分母为零
+        return [0.5] * len(data)
+    return [(x - min_val) / (max_val - min_val) for x in data]
+def plot_multi(fpath,picpath,valuelist,dataset,alpha,xlabel,length=-1):
+    '''
+    绘制不同列的曲线图
+    Args:
+        value: 列的名称
+        length: 制定列的长度
+        names:所有列名
 
+    Returns:
+
+    '''
+    # 读取txt文件，指定列名
+    data = pd.read_csv(fpath,header=0)
+    #print("read data from :",fpath,data.head(5))
+    # 查看列名
+    print("data.columns is : ",data.columns)
+    # 清理列名中的空格
+    data.columns = data.columns.str.strip()
+    # 检查数据类型
+    # for i in data.columns:
+    #     print(i," data",data[i].tolist())
+
+    # 按照method分组
+    title=" trend of different algorithms"
+    labellist = []
+    ylist = []
+    points=[]
+    for i in valuelist:
+        #print(i,data[i].tolist())
+        ll=[float(j) for j in data[i].tolist()]
+        #print("ll",i ,ll)
+        # newll=[]
+        # if i =='Accurancy':
+        #     for j in range(len(ll)-1):
+        #         print("j",j,len(ll))
+        #         newll.append(ll[j+1]-ll[j])
+        #     ll=newll
+
+
+        #ylist.append(normalize_list(data[i].tolist()[:length]))
+        ylist.append(normalize_list(ll)[:length])
+        labellist.append(i)
+    correlation = np.corrcoef(ylist[0], ylist[1])[0, 1]
+    from scipy.stats import spearmanr
+    print("两列数据的相关性（皮尔逊相关系数）：", correlation)
+    correlation, p_value = spearmanr(ylist[0], ylist[1])
+
+    print("两列数据的相关性（斯皮尔曼相关系数）：", correlation)
+    print("accracy", ylist)
+    x = [i for i in range(len(ylist[0]))]
+
+    # colist=['red','yellow','blue','green','black','pink','orange']
+    # necolist=[]
+    # for i in range(len(ylist)):
+    #     necolist.append(colist[i])
+    # 获取预定义的颜色循环
+    cmap = plt.get_cmap('tab10')  # 使用 'tab10' 颜色循环，共有10种颜色
+    # 定义要绘制的曲线数量
+    num_curves = 15
+    # 生成一组颜色
+    colist = [cmap(i) for i in range(num_curves)][:len(ylist)]
+    print("col",len(ylist))
+    #colist = ['red',  'blue', 'green', 'black', 'orange']
+    print(f"must equal len(ylist)={len(ylist)}, len(colist)={ len(colist)},labellist={len(labellist)}")
+    plot_multiline(picpath,x,ylist,labellist,colist,title,"value",dataset,alpha,xlabel)
+
+
+
+def plotoneline(x,y):
+    # 创建绘图
+    plt.figure(figsize=(8, 5))
+
+    # 绘制曲线
+    plt.plot(x, y, marker='o', color='blue', label='y = x^2')
+
+    # 设置轴标签和标题
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.title('Plot of y = x^2')
+
+    # 添加网格
+    plt.grid()
+
+    # 添加图例
+    plt.legend()
+
+    # 显示图形
+    plt.show()
+def normalize(data):
+    min_value = min(data)
+    max_value = max(data)
+    normalized_data = [(x - min_value) / (max_value - min_value) for x in data]
+    return normalized_data
+def plot_distance(path):
+    # 读取CSV文件
+    df = pd.read_csv(path)
+    # 选择特定的method，例如 'FedPyramid'
+    selected_method = 'FedPyramid'
+    df_filtered = df[df['method'] == selected_method]
+    df_filtered2 = df[df['method'] == 'FedVOI']
+    print(df_filtered.head())
+    # 排序数据以便于绘制曲线
+
+    # 创建绘图
+    plt.figure(figsize=(10, 6))
+
+    # 绘制 Distance 曲线
+   # plt.plot(x, df_filtered[''], marker='o', label='Distance', color='blue')
+
+    # 绘制 Accuracy 曲线
+    x1 = [float(i) for i in df_filtered2['distance'].tolist()]
+    # 进行归一化
+    # x = normalize(x)
+    y1 = [float(i) for i in df_filtered2['Accurancy'].tolist()]
+
+
+    x=[float(i) for i in df_filtered['distance'].tolist()]
+    # 进行归一化
+    # x = normalize(x)
+    y = [float(i) for i in df_filtered['Accurancy'].tolist()]
+    print(f"x is {x},y is {y}")
+    # 计算皮尔逊相关系数
+    correlation_coefficient, p_value = pearsonr(x1, y1)
+    from scipy.stats import spearmanr, kendalltau
+
+    spearman_corr, spearman_p = spearmanr(x1, y1)
+    kendall_corr, kendall_p = kendalltau(x1, y1)
+
+    print(f"Spearman 相关系数: {spearman_corr}, p值: {spearman_p}")
+    print(f"Kendall 相关系数: {kendall_corr}, p值: {kendall_p}")
+    # 输出结果
+    print(f"皮尔逊相关系数: {correlation_coefficient}")
+    print(f"p值: {p_value}")
+    # plotoneline(x,y_accuracy)
+
+    #继续分析
+
+    from sklearn.preprocessing import PolynomialFeatures
+    from sklearn.linear_model import LinearRegression
+    import numpy as np
+
+    # 将数据转换为numpy数组
+    x_np = np.array(x).reshape(-1, 1)
+    y_np = np.array(y).astype(float)
+
+    # 多项式特征
+    poly = PolynomialFeatures(degree=2)  # 选择合适的多项式度数
+    x_poly = poly.fit_transform(x_np)
+
+    # 线性回归模型
+    model = LinearRegression()
+    model.fit(x_poly, y_np)
+
+    # 绘制结果
+    plt.scatter(x1, y1, color='red', alpha=0.6)
+    plt.scatter(x, y, color='blue', alpha=0.6)
+    plt.plot(x, model.predict(x_poly), color='red')
+    plt.title('Polynomial Regression Fit')
+    plt.xlabel('Distance')
+    plt.ylabel('Accuracy')
+    plt.show()
+def find(path):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from scipy.stats import linregress
+
+    # 读取数据
+    data = pd.read_csv(path)  # 假设数据已保存
+    distance = data['distance']
+    accuracy = data['Accurancy']
+    distance = pd.to_numeric(distance, errors='coerce')
+    accuracy = pd.to_numeric(accuracy, errors='coerce')
+
+    # 绘制散点图
+    print(f"distance is {distance.tolist()},accuracy is {accuracy.tolist()}")
+    # plt.scatter(distance, accuracy, alpha=0.6, label='Data Points')
+    # plt.xlabel('Distance')
+    # plt.ylabel('Accuracy')
+    # plt.title('Distance vs Accuracy')
+    #
+    # # 线性回归分析
+    # slope, intercept, r_value, p_value, std_err = linregress(distance, accuracy)
+    # plt.plot(distance, intercept + slope * distance, 'r', label=f'Linear Fit: R²={r_value ** 2:.3f}')
+    # plt.legend()
+    # plt.show()
 
 
 programpath="/Users/alice/Desktop/python/FL_selection/"
 dataset="mnist"
-xlabel=" Commnication Round on cifar10 "
+xlabel=" Commnication Round on mnist "
 join_ratio='0.5'
-alpha='0.5'
+alpha='0.05'
 num_clients=20
-alpha="0.5"
 method='FedAvg'
 group=50
-folder_path = programpath + "/res/" + method + "/"
-fpath = folder_path + dataset + "_acc.csv"
-#fpath=programpath + "/res/ " + dataset + "_allacc_" + str(join_ratio) + "_" + str(num_clients) + "_" + str(alpha) + ".csv"
+folder_path = programpath + "/res/"
+# fpath = folder_path + dataset + "_allacc_0.5_20_0.05.csv"
+# fpath = dataset + "_allacc_" + str(join_ratio) + "_" + str(
+#             num_clients) + "_" + str(alpha) + ".csv"
+fpath=programpath+'plotResult/mnist_all.csv'
+#fpath=programpath+'plotResult/dongji.csv'
 picpath=folder_path + dataset + "_acc.png"
-plot_select(fpath,picpath,'Accuracy',dataset,alpha,xlabel,group)
+
+#----------------------
+tex="motivation"
+group=200
+fpath=programpath+"plotResult/"+tex+".csv"
+picpath=programpath+"plotResult/"+tex+".png"
+value='Accurancy'
+plot_select(fpath,picpath,value,dataset,alpha,xlabel,group)
+
+
+#fpath=programpath + "/res/ " + dataset + "_allacc_" + str(join_ratio) + "_" + str(num_clients) + "_" + str(alpha) + ".csv"
+#绘制不同算法的准确率曲线图
+# plot_select(fpath,picpath,'Accurancy',dataset,alpha,xlabel,group)
+# plot_select(fpath,picpath,'round_time',dataset,alpha,xlabel,group)
+# plot_select(fpath,picpath,'highResourceClientNum',dataset,alpha,xlabel,group)
+# plot_select(fpath,picpath,'distance',dataset,alpha,xlabel,group)
+v=['Accurancy','round_time','distance','highResourceClientNum']
+#'Kl', 'JS', 'EMD', 'round_time'
+#plot_multi(fpath,picpath,['Accurancy','highResourceClientNum'],dataset,alpha,xlabel,group)
+#数据分布距离图
+# plot_select(fpath,picpath,'Accurancy',dataset,alpha,xlabel,group)
+# find(fpath)
+# from scipy.stats import pearsonr
+# plot_distance(fpath)
 
 

@@ -1,7 +1,7 @@
 import torch
-import os
+import os,pickle
 import numpy as np
-import h5py
+import h5py,json
 import copy
 import time,math
 import random
@@ -10,6 +10,7 @@ from utils.distance import jensen_shannon_distance
 from utils.data_utils import read_client_data
 from utils.dlg import DLG
 from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 import ast
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,12 +26,19 @@ class Server(object):
     def __init__(self, args, times,filedir="test"):
         #记录数据文件的位置，同一个数据集不同程度的数据分布差异
         self.filedir=args.dataset
+        #选择客户端模型
         self.select_mode = args.select_mode
         self.method =None
         self.fix_ids = False
         self.select_idlist = []
         self.randomSelect = False
         self.Budget = []
+        #all data size
+        self.samples=0
+        self.cost_time = 0
+        self.total_time = 10000
+        #all client resource
+        self.clientsResource={}
         #聚合误差
         self.aggreErr=[]
         # 设置client数据
@@ -38,6 +46,7 @@ class Server(object):
         self.client_learning_rate = args.local_learning_rate
         self.client_local_epochs = args.local_epochs
         self.fix_ids = False
+
         self.ISAAW=False
         self.programpath=Programpath
         self.device = args.device
@@ -53,12 +62,15 @@ class Server(object):
             self.labellenght = 200
         # 记录所有的weights
         self.allweights = []
-        self.total_time=36000
+        self.Isgenerate_ClientInfo=False
+
         self.alpha=Aphla
 
         #----self.alllabel = [0 for i in range(self.labellenght)]
         self.alllabel = [0 for i in range(self.labellenght)]
-
+        self.num_join_clients=int(args.num_clients*args.random_join_ratio)
+        self.current_num_join_clients = self.num_join_clients
+        self.costedResoure=0
 
 
 
@@ -113,9 +125,58 @@ class Server(object):
         self.new_clients = []
         self.eval_new_clients = False
         self.fine_tuning_epoch = args.fine_tuning_epoch
+        #oort----------------
+        self.blacklist = []
+        # All clients' utilities
+        self.client_utilities = {}
+        # All clients‘ training times
+        self.client_durations = {}
+        # Keep track of each client's last participated round.
+        self.client_last_rounds = {}
+        # Number of times that each client has been selected
+        self.client_selected_times = {}
+        # The desired duration for each communication round
+        self.desired_duration = None
+        self.explored_clients = []
+        self.unexplored_clients = []
+
+
+
+
+
+
+
+
+    def record_update(self,round,selectids):
+        #更新信息
+        kl_div, js_div, emd = self.get_select_distance()
+        # 新增：统计每一轮训练的资源消耗------
+        highClientNum = 0
+        round_time = []
+        for client in self.clients:
+            if client.id in selectids:
+                client.select_time += 1
+                client.last_select = round
+                if client.isRichResource:
+                    highClientNum += 1
+                round_time.append(client.costedResoure)
+        self.cost_time += max(round_time)
+        return kl_div, js_div, emd,round_time,highClientNum
+
+
+    def updates_costedResoure(self):
+        #本轮的cost_time
+        costList=[]
+        for client in self.clients:
+            costList.append(client.costedResoure)
+        self.costedResoure=max(costList)
+
 
     def set_clients_origin(self, clientObj):
         print("**************************1.INfo,serverbase set_clients ,init data********************")
+
+
+
         samples=0
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
             train_data = read_client_data(self.dataset, i, is_train=True)
@@ -154,15 +215,23 @@ class Server(object):
         self.send_slow_clients = self.select_slow_clients(
             self.send_slow_rate)
 
+    def get_top_k_clients(self,sizeClient, K):
+        # 对字典按值排序（从大到小），并提取前K项
+        top_k = sorted(sizeClient.items(), key=lambda item: item[1], reverse=True)[:K]
+        # 将结果拆分为两个列表：IDs 和 sizes
+        top_k_ids = [item[0] for item in top_k]
+        top_k_sizes = [item[1] for item in top_k]
+        return top_k_ids, top_k_sizes
     def select_clients(self,round=-1):
+        print(f"select mode is {self.select_mode}")
         selected_clients=[]
         if round==-1:
             #说明不是固定的客户端选择
-            if self.random_join_ratio:
-                #计算客户端选择数量
-                self.current_num_join_clients = np.random.choice(range(self.num_join_clients, self.num_clients + 1), 1, replace=False)[0]
-            else:
-                self.current_num_join_clients = self.num_join_clients
+            # if self.random_join_ratio:
+            #     #计算客户端选择数量
+            #     self.current_num_join_clients = np.random.choice(range(self.num_join_clients, self.num_clients + 1), 1, replace=False)[0]
+            # else:
+            #     self.current_num_join_clients = self.num_join_clients
 
 
             if self.select_mode == 'pyramidFy':
@@ -179,7 +248,16 @@ class Server(object):
 
             if self.select_mode == 'random':
                 selected_clients = list(np.random.choice(self.clients, self.current_num_join_clients, replace=False))
-
+            if self.select_mode == 'datasize':
+                sizeClient={}
+                for client in self.clients:
+                    sizeClient[client.id]=client.size
+                ids, top_k_sizes = self.get_top_k_clients(sizeClient, (self.current_num_join_clients))
+                print("ids, top_k_sizes",ids, top_k_sizes)
+                selected_clients = []
+                for c in self.clients:
+                    if c.id in ids:
+                        selected_clients.append(c)
 
             return selected_clients
 
@@ -193,7 +271,43 @@ class Server(object):
                     ids.append(c.id)
             print(f"INFO:----------fix client id is :group is {round} select id list is:", ids, type(selected_clients[0]))
             return selected_clients
+    def computeResource(self,mean_training_time=100,std_dev_training_time=50):
+        # 从正态分布中生成训练时间
+        training_times = np.random.normal(mean_training_time, std_dev_training_time, self.num_clients)
+        # 确保训练时间为正数，并裁剪到合理范围
+        training_times = np.clip(training_times, 1, None)
 
+        # 输出每个客户端的训练时间
+        timedict={}
+        for client_id, time in enumerate(training_times):
+            #print(f"客户端 {client_id}: 训练时间 {time:.2f} 秒")
+            timedict[client_id]=time
+        for client in self.clients:
+            client.compute=timedict[client.id]
+
+    def communicateResource(self,mean_training_time=50,std_dev_training_time=100):
+        # 从正态分布中生成训练时间
+        training_times = np.random.normal(mean_training_time, std_dev_training_time, self.num_clients)
+        # 确保训练时间为正数，并裁剪到合理范围
+        training_times = np.clip(training_times, 1, None)
+        # 输出每个客户端的训练时间
+        timedict={}
+        for client_id, time in enumerate(training_times):
+            #print(f"客户端 {client_id}: 通信时间 {time:.2f} 秒")
+            timedict[client_id]=time
+        for client in self.clients:
+            client.communicate=timedict[client.id]
+
+    def set_global_client_profile(self,path):
+        # self.communicateResource()
+        # self.computeResource()
+        global_client_profile={}
+        for client in self.clients:
+            global_client_profile[client.id]=[client.compute,client.communicate]
+            print("client resource is :",client.id,client.compute,client.communicate)
+        # 将 global_client_profile 存储到文件
+        with open(path, 'wb') as fout:
+            pickle.dump(global_client_profile, fout)
 
     def send_models(self):
         '''
@@ -204,9 +318,9 @@ class Server(object):
         assert (len(self.clients) > 0)
 
         # add更新模型参数，将globalmodel复制给本地模型----------------------
-        for client in self.selected_clients:
-            if self.ISAAW:
-                client.local_initialization(self.global_model, round)
+        # for client in self.selected_clients:
+        #     if self.ISAAW:
+        #         client.local_initialization(self.global_model, round)
         #------------------------------------
 
         for client in self.clients:
@@ -780,7 +894,7 @@ class Server(object):
         print(file_path)
         data = pd.read_csv(file_path)
 
-        print(data)
+        #print(data)
         rounds = data['global_rounds'].tolist()
         # print(data['ids'].tolist()[0])
         ids = [ast.literal_eval(i) for i in data['id_list'].tolist()]
@@ -789,7 +903,7 @@ class Server(object):
         id_dict = {}
         for i in range(len(rounds)):
             id_dict[rounds[i]] = ids[i]
-        print(id_dict)
+        #print(id_dict)
         return id_dict
 
     def evaluate_origin(self, acc=None, loss=None):
@@ -856,13 +970,19 @@ class Server(object):
 
     def set_clients(self, clientObj):
         print("**************************1.INfo,set_clients ,init data********************")
-        samples = 0
+        self.samples = 0
+        # 初始化资源信息
+        clientinf_path = self.programpath + "dataset/" + self.alpha + "/" + self.dataset + "/clientInfo.json"
+        if self.Isgenerate_ClientInfo:
+            self.initialize_clients(file_path=clientinf_path)
+        self.clientsResource = self.read_clients(clientinf_path)
+        # self.plot_clients_resource(self.clientsResource)
         print("train_slow,send_slow", self.num_clients, self.train_slow_clients, self.send_slow_clients)
         # 读取所有的训练数据和测试数据
         for i, train_slow, send_slow in zip(range(self.num_clients), self.train_slow_clients, self.send_slow_clients):
             train_data = read_client_data(self.dataset, i, is_train=True)
             test_data = read_client_data(self.dataset, i, is_train=False)
-            samples += len(train_data) + len(test_data)
+            self.samples += len(train_data) + len(test_data)
             client = clientObj(self.args,
                                id=i,
                                traindata=train_data,
@@ -878,7 +998,17 @@ class Server(object):
             for j in range(len(label)):
                self.alllabel[j] +=label[j]
             client.size=client.train_samples + client.test_samples
-            client.sizerate = (client.size*1.0) / samples
+            client.sizerate = (client.size*1.0) / self.samples
+            client.compute=self.clientsResource[client.id]["compute"]
+            client.communicate=self.clientsResource[client.id]["comm"]
+            client.offline=self.clientsResource[client.id]["dropout"]
+            client.costedResoure=client.communicate*2+client.compute
+            self.clientsResource[client.id]["size"]=client.size
+        if self.Isgenerate_ClientInfo:
+            # 将数据写入 JSON 文件
+            with open(clientinf_path, "w") as file:
+                json.dump(self.clientsResource, file, indent=4)
+            print(f"Clients data saved to {clientinf_path}")
 
 
 
@@ -890,22 +1020,59 @@ class Server(object):
 
         # print(f"client {client.id} ,sizerate is {client.sizerate}")
         self.writeclientInfo()
+    def getlabel(self,ids):
+        lag = True
+        select_label = None
+        for client in self.clients:
+               # 初始化
+            if lag:
+                select_label = [0 for i in range(len(client.label))]
+                lag = False
+            if client.id in ids:
+                for j in range(len(client.label)):
+                    select_label[j] += client.label[j]
+        return select_label
+
+
 
     def get_select_distance(self):
-        lag=True
-        select_label =None
-        for client in self.select_clients():
-            if lag:
-                select_label= [i for i in client.label]
-            else:
+            lag=True
+            select_label =None
+            #print("self.selected_clients",self.selected_clients)
+            for client in self.selected_clients:
+                #初始化
+                if lag:
+                    select_label= [0 for i in range(len(client.label))]
+                    lag=False
+                #累加
+                #print(f"client {client.id} client.label {client.label}")
                 for j in range(len(client.label)):
                     select_label[j]+=client.label[j]
 
-        return self.calculate_hellinger_distance(select_label, self.alllabel)
 
+            return self.newdistance(select_label,self.alllabel)
 
+            #return self.calculate_hellinger_distance(select_label, self.alllabel)
 
+    def newdistance(self,label1,label2):
+        # 将频数归一化为概率分布
+        list1 = np.array(label1, dtype=float)
+        list2 = np.array(label2, dtype=float)
 
+        prob1 = list1 / np.sum(list1)
+        prob2 = list2 / np.sum(list2)
+        #print(f"prob1 {prob1},prob2 {prob2}")
+        from scipy.stats import entropy,wasserstein_distance
+
+        # 添加一个微小的数值，防止分母为0
+        epsilon = 1e-10
+        kl_div = entropy(prob1 + epsilon, prob2 + epsilon)
+
+        from scipy.spatial.distance import jensenshannon
+        js_div = jensenshannon(prob1, prob2)
+
+        emd = wasserstein_distance(prob1, prob2)
+        return kl_div,js_div,emd
 
     def select_weight_vector(self):
         active_distance = 0
@@ -1091,20 +1258,17 @@ class Server(object):
         return resc
     def write_selectids(self,select_id):
         print("select_id value is,",select_id)
-        #写入选择的客户端信息
-        if not self.fix_ids:
-            folder_path=self.programpath + "/res/selectids/"
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
-            idpath = folder_path + self.dataset + "_select_client_ids" + str(
-                self.num_clients) + "_" + str(self.join_ratio) + ".csv"
-            redf = pd.DataFrame(columns=["global_rounds", "id_list"])
+        folder_path = self.programpath + "/res/" + self.method + "/"
+        spath = folder_path + self.dataset + "_selectids.csv"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        redf = pd.DataFrame(columns=["global_rounds", "id_list"])
             #redf.loc[len(redf) + 1] = ["*********************", "*********************"]
-            redf.loc[len(redf) + 1] = ["global_rounds", "id_list"]
-            for v in range(len(select_id)):
-                redf.loc[len(redf) + 1] = select_id[v]
-            redf.to_csv(idpath, mode='a', header=False)
-            print("write select id list ", idpath)
+        redf.loc[len(redf) + 1] = ["global_rounds", "id_list"]
+        for v in range(len(select_id)):
+            redf.loc[len(redf) + 1] = select_id[v]
+        redf.to_csv(spath, mode='a', header=False)
+        print("write select id list ", spath)
     def write_acc(self,colum_value):
         # 写入评估指标
         folder_path = self.programpath + "/res/" + self.method + "/"
@@ -1114,16 +1278,33 @@ class Server(object):
 
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        colum_name = ["case", "method", "group", "Loss", "Accurancy", "AUC", "Std Test Accurancy", "Std Test AUC","select_mode","distance"]
+        colum_name = ["case", "method", "group", "Loss", "Accurancy", "AUC", "Std Test Accurancy", "Std Test AUC","Kl","JS","EMD","round_time","highResourceClientNum","select_mode"]
         redf = pd.DataFrame(columns=colum_name)
+        print("colum_value is :",colum_value[0],len(colum_name))
         redf.loc[len(redf) + 1] = colum_name
         for i in range(len(colum_value)):
             colum_value[i].append(self.select_mode)
-            print("colum_value",len(colum_value[i]))
+            #print("colum_value",len(colum_value[i]))
             redf.loc[len(redf) + 1] = colum_value[i]
         redf.to_csv(accpath, mode='a', header=False)
         redf.to_csv(allpath, mode='a', header=False)
         print("success training write acc txt", accpath,allpath)
+    def setHighResourceClient(self):
+        resoure={}
+        for client in self.clients:
+            resoure[client.id]=client.costedResoure
+        # 按综合资源值排序（从小到大）
+        sorted_resoure = sorted(resoure.items(), key=lambda x: x[1])
+
+        # 获取前K个高资源客户端的ID
+        K = int(0.2* self.num_clients)
+        high_resource_ids = [item[0] for item in sorted_resoure[:K]]
+        # 打标记高资源客户端
+        for client in self.clients:
+            if client.id in high_resource_ids:
+                client.isRichResource = True
+                print(f"client id is {client.id},resource is {client.costedResoure}")
+
 
     def wirte_time(self):
         #记录一下时间资源消耗
@@ -1139,4 +1320,162 @@ class Server(object):
         self.write_selectids(select_id)
         self.write_acc(colum_value)
         self.wirte_time()
+        self.write_client()
+    def write_client(self):
+        folder_path = self.programpath + "/res/" + self.method + "/"
+        clientpath= folder_path + self.dataset + "_clientResource.csv"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        colum_value=[]
+        for client in self.clients:
+            colum_value.append([client.id,client.select_time,client.isRichResource,client.last_select])
+        colum_name = ["id", "select_time", "isRichResource", "last_select"]
+        redf = pd.DataFrame(columns=colum_name)
+        redf.loc[len(redf) + 1] = colum_name
+        for i in range(len(colum_value)):
+            redf.loc[len(redf) + 1] = colum_value[i]
+        redf.to_csv(clientpath, mode='a', header=False)
+
+
+
+
+
+
+
+    # def initialize_clients_0(self, mu_c=10, sigma_c=2, r_min=2, r_max=10, alpha=2, beta=5, file_path="clients_data.json"):
+    #
+    def initialize_clients(self,
+                               high_ratio=0.3, mid_ratio=0.4, low_ratio=0.3,
+                               # 计算资源分布参数
+                               mu_high_compute=1, sigma_high_compute=0.5,
+                               mu_mid_compute=5, sigma_mid_compute=1,
+                               mu_low_compute=10, sigma_low_compute=2,
+                               # 通信资源分布参数
+                               mu_high_comm=2, sigma_high_comm=0.5,
+                               mu_mid_comm=5, sigma_mid_comm=1,
+                               mu_low_comm=10, sigma_low_comm=2,
+                               # 失联概率分布参数
+                               alpha=2, beta=5,
+                               file_path="clients_data.json"):
+
+        clients = []
+
+        # 按比例分配客户端数量
+        high_count = int(self.num_clients * high_ratio)
+        mid_count = int(self.num_clients * mid_ratio)
+        low_count = self.num_clients - high_count - mid_count
+
+        # === 计算资源分布 ===
+        compute_high = np.random.normal(mu_high_compute, sigma_high_compute, high_count)
+        compute_mid = np.random.normal(mu_mid_compute, sigma_mid_compute, mid_count)
+        compute_low = np.random.normal(mu_low_compute, sigma_low_compute, low_count)
+
+        # 修正负值
+        compute_high = np.clip(compute_high, 0.1, None)
+        compute_mid = np.clip(compute_mid, 0.1, None)
+        compute_low = np.clip(compute_low, 0.1, None)
+
+        # 合并计算资源
+        compute_times = np.concatenate([compute_high, compute_mid, compute_low])
+
+
+        # === 通信资源分布 ===
+        comm_high = np.random.normal(mu_high_comm, sigma_high_comm, high_count)
+        comm_mid = np.random.normal(mu_mid_comm, sigma_mid_comm, mid_count)
+        comm_low = np.random.normal(mu_low_comm, sigma_low_comm, low_count)
+
+        # 修正负值
+        comm_high = np.clip(comm_high, 0.1, None)
+        comm_mid = np.clip(comm_mid, 0.1, None)
+        comm_low = np.clip(comm_low, 0.1, None)
+
+        # 合并通信资源
+        comm_times = np.concatenate([comm_high, comm_mid, comm_low])
+
+        # === 失联概率分布 ===
+        dropout_probs = np.random.beta(alpha, beta, self.num_clients)
+
+
+        compute_times = np.round(compute_times, 2)
+        comm_times = np.round(comm_times, 2)
+        dropout_probs = np.round(dropout_probs, 2)
+
+        # === 打乱资源顺序 ===
+        np.random.shuffle(compute_times)
+        np.random.shuffle(comm_times)
+        np.random.shuffle(dropout_probs)
+
+        # === 生成客户端数据 ===
+        for i in range(self.num_clients):
+            clients.append({
+                    "id": i + 1,
+                    "compute": compute_times[i],  # 计算资源
+                    "comm": comm_times[i],  # 通信资源
+                    "dropout": dropout_probs[i]  # 失联概率
+                })
+
+        # 将数据写入 JSON 文件
+        with open(file_path, "w") as file:
+            json.dump(clients, file, indent=4)
+        print(f"Clients data saved to {file_path}")
+
+    # clients = []
+    #
+    # for i in range(self.num_clients):
+    #     c_i = max(0, np.random.normal(mu_c, sigma_c))  # 计算资源，正态分布
+    #     r_i =max(0, np.random.normal(r_min, r_max))  # 通信资源，均匀分布
+    #     p_i = np.random.beta(alpha, beta)  # 失联概率，Beta分布
+    #     clients.append({"id": i + 1, "compute": c_i, "comm": r_i, "dropout": p_i})
+    #
+    #     # 将数据写入 JSON 文件
+    #     with open(file_path, "w") as file:
+    #         json.dump(clients, file, indent=4)
+    #     print(f"Clients data saved to {file_path}")
+
+    def read_clients(self,file_path="clients_data.json"):
+        # 从 JSON 文件读取客户端数据
+        with open(file_path, "r") as file:
+            clients = json.load(file)
+        print(f"Clients data loaded from {file_path}")
+        print("clients",clients)
+        return clients
+
+
+    def plot_clients_resource(self,clients):
+        # 提取资源信息
+        client_ids = [client["id"] for client in clients]
+        compute_resources = [client["compute"] for client in clients]
+        comm_resources = [client["comm"] for client in clients]
+        dropout_probabilities = [client["dropout"] for client in clients]
+        # 设置图形大小
+        plt.figure(figsize=(12, 6))
+
+        # 绘制计算资源柱状图
+        plt.bar(client_ids, compute_resources, width=0.25, label="Compute Resources", align='center')
+
+        # 绘制通信资源柱状图
+        plt.bar([x + 0.25 for x in client_ids], comm_resources, width=0.25, label="Communication Resources",
+                align='center')
+
+        # 绘制失联概率柱状图
+        plt.bar([x + 0.5 for x in client_ids], dropout_probabilities, width=0.25, label="Dropout Probabilities",
+                align='center')
+
+        # 添加图例
+        plt.legend()
+
+        # 添加标题和坐标轴标签
+        plt.title("Resource Distribution Across Clients")
+        plt.xlabel("Client ID")
+        plt.ylabel("Resource Values")
+
+        # 调整 x 轴刻度
+        plt.xticks([x + 0.25 for x in client_ids], client_ids)
+
+        # 显示图形
+        plt.tight_layout()
+        plt.show()
+
+
+
 

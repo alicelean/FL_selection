@@ -18,14 +18,30 @@ class FeedForwardNN(nn.Module):
             obs = torch.tensor(obs, dtype=torch.float)
         if isinstance(obs, list):
             obs = torch.tensor(obs, dtype=torch.float)
+            # 检查输入有效性
+        if torch.isnan(obs).any() or torch.isinf(obs).any():
+            raise ValueError("obs contains NaN or infinity values")
         #print("obs is :obs",obs)
+        obs = obs.to(torch.float32)
+        # 展平输入矩阵
+
+        # 归一化输入数据（标准化）
+        # 如果数据是多维的，可以使用 torch.mean 和 torch.std 对每一维进行标准化
+        # 这里假设输入是2D的：batch_size x flatten_size
+        obs_mean = torch.mean(obs, dim=0, keepdim=True)
+        obs_std = torch.std(obs, dim=0, keepdim=True)
+
+        # 标准化（去均值，除以标准差）
+        obs = (obs - obs_mean) / (obs_std + 1e-8)  # 添加一个小的epsilon防止除以0
+
         # 展平输入矩阵
         obs = obs.view(-1, self.flatten_size)
         obs = obs.float()
         #print(f"Input shape after flattening: {obs.shape}")
         x = torch.relu(self.fc1(obs))  # 第一个隐藏层 + ReLU
         x = torch.relu(self.fc2(x))  # 第二个隐藏层 + ReLU
-        output = self.fc3(x)         # 输出层（线性）
+        output = self.fc3(x)
+        #print("x",x)# 输出层（线性）
         return output
 
 # class FeedForwardNN(nn.Module):

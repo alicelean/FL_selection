@@ -36,6 +36,21 @@ class Client(object):
         self.compute =0
         #通信资源
         self.communicate = 0
+        self.costedResoure=0
+        #掉线率
+        self.offline=0
+        #选择次数
+        self.select_time=0
+        #最后一次选择
+        self.last_select=0
+        self.isRichResource=False
+
+        #oort--------------
+        # oort
+        self.utility = 0
+        self.durations = 0
+
+
 
 
         self.current_round = 0
@@ -526,5 +541,113 @@ class Client(object):
         train_data=self.traindata
         print("training batch_size is :", batch_size,len(train_data))
         return DataLoader(train_data, 77, drop_last=True, shuffle=False)
+
+    def test_metrics_global(self, model):
+        testloaderfull = self.load_test_data()
+        if testloaderfull is None:
+            print("client test_metrics Error: Failed to load test data.")
+            return None
+
+        # self.model = self.load_model('model')
+        # self.model.to(self.device)
+        model.eval()
+
+        test_acc = 0
+        test_num = 0
+        y_prob = []
+        y_true = []
+        # 记录NaN值的数量
+        nan_x = 0
+        nan_y = 0
+        nan_output = 0
+        with torch.no_grad():
+            for x, y in testloaderfull:
+                if type(x) == type([]):
+                    x[0] = x[0].to(self.device)
+                else:
+                    x = x.to(self.device)
+                y = y.to(self.device)
+
+                # 检查输入数据中是否存在NaN值
+                if self.dataset != 'agnews':
+                    if torch.isnan(x).any():
+                        nan_x += 1
+                        continue
+                    if torch.isnan(y).any():
+                        nan_y += 1
+
+                output = model(x)
+
+                # 检查模型输出中是否存在NaN值
+                if self.dataset != 'agnews':
+                    if torch.isnan(output).any():
+                        nan_output += 1
+                        continue
+
+                test_acc += (torch.sum(torch.argmax(output, dim=1) == y)).item()
+                test_num += y.shape[0]
+
+                y_prob.append(output.detach().cpu().numpy())
+                nc = self.num_classes
+                if self.num_classes == 2:
+                    nc += 1
+                lb = label_binarize(y.detach().cpu().numpy(), classes=np.arange(nc))
+                if self.num_classes == 2:
+                    lb = lb[:, :2]
+                y_true.append(lb)
+        # self.model.cpu()
+        # self.save_model(self.model, 'model')
+        nan_count = nan_x + nan_y + nan_output
+        if nan_count > 0:
+            nan_ratio = nan_count / len(testloaderfull)  # 计算NaN值在测试数据中的比例
+            print(
+                f"client {self.id} ,nan_x {nan_x},nan_y {nan_y},nan_output {nan_output},total NaN value ratio in test data: {nan_ratio:.2%}")
+        if nan_count != len(testloaderfull):
+            y_prob = np.concatenate(y_prob, axis=0)
+            y_true = np.concatenate(y_true, axis=0)
+
+            auc = metrics.roc_auc_score(y_true, y_prob, average='micro')
+
+            return test_acc, test_num, auc
+        else:
+            print(f"ERROR:testloaderfull {len(testloaderfull)},nan_count {nan_count}, test_num {test_num}")
+            return 0, test_num, 0
+
+    def train_metrics_global(self, model):
+        trainloader = self.load_train_data()
+        # self.model = self.load_model('model')
+        # self.model.to(self.device)
+        model.eval()
+
+        train_num = 0
+        losses = 0
+        with torch.no_grad():
+            for x, y in trainloader:
+                if type(x) == type([]):
+                    x[0] = x[0].to(self.device)
+                else:
+                    x = x.to(self.device)
+                y = y.to(self.device)
+                output = model(x)
+                # print("label",torch.min(y))  # 检查最小值
+                # print(torch.max(y))  # 检查最大值
+                # print(y)
+                # 检查标签的最大值
+                # print("model print",output ,y)
+                loss = self.loss(output, y)
+
+
+                # print("test:",loss.shape)
+                loss = loss.mean()
+                train_num += y.shape[0]
+                losses += loss.item() * y.shape[0]
+
+        # self.model.cpu()
+        # self.save_model(self.model, 'model')
+
+        return losses, train_num
+
+
+
 
 
